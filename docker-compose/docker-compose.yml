@@ -1,0 +1,185 @@
+version: "3.9"
+
+x-aliases:
+  - &common_parameters
+    networks:
+    - anfisa
+
+networks:
+  anfisa:
+    driver: bridge
+    name: anfisa
+    ipam:
+      config:
+        - subnet:  172.23.0.0/16
+
+services:
+  anfisa-frontend:
+    container_name: anfisa-frontend
+    <<: *common_parameters
+    build:
+      context: ${GIT_URL:-https://github.com/ForomePlatform/Anfisa-React-Client.git}#${GIT_REF:-develop}
+      dockerfile: Dockerfile
+    image: anfisa-react-client:latest
+    ports:
+      - "3000:80"
+    env_file:
+      - .evn
+    restart: always
+
+  anfisa-backend:
+    container_name: anfisa-backend
+    <<: *common_parameters
+    image: anfisa:latest
+    user: root
+    volumes:
+      - ASETUP_PATH:/anfisa/a-setup
+    build:
+      context: .
+      dockerfile: setup/Dockerfile
+    ports:
+      - "9010:80"
+    env_file:
+      - .env
+    restart: always
+
+  mongo:
+    container_name: anfisa-mongo
+    <<: *common_parameters
+    image: mongo
+    user: root
+    ports:
+      - "27017:27017"
+    env_file:
+      - .env
+    restart: always
+
+  zookeeper:
+    container_name: anfisa-zookeeper
+    <<: *common_parameters
+    image: zookeeper:3.5
+    user: root
+    ports:
+      - "2181:2181"
+      - "2888:2888"
+      - "3888:3888"
+      - "8080:8080"
+    environment:
+      - ZOO_MY_ID=1
+      - ZK_SERVER_HEAP=128
+    restart: always
+
+  coordinator:
+    container_name: anfisa-coordinator
+    <<: *common_parameters
+    image: apache/druid:0.19.0
+    user: root
+    volumes:
+      - DRUID_WORK/data/:/opt/data/
+      - DRUID_WORK/coordinator:/opt/druid/var
+    depends_on:
+      - zookeeper
+    ports:
+      - "8081:8081"
+    command:
+      - coordinator
+    environment:
+      - DRUID_XMS=256m
+      - DRUID_XMX=2g
+    env_file:
+      - .env
+    restart: always
+
+  broker:
+    container_name: anfisa-broker
+    <<: *common_parameters
+    image: apache/druid:0.19.0
+    user: root
+    volumes:
+      - DRUID_WORK/broker:/opt/druid/var
+    depends_on:
+      - zookeeper
+      - coordinator
+    ports:
+      - "8082:8082"
+    command:
+      - broker
+    environment:
+      - DRUID_XMS=512m
+      - DRUID_XMX=2g
+      - druid_processing_numMergeBuffers=2
+      - druid_processing_numThreads=1
+    env_file:
+      - .env
+    restart: always
+
+  historical:
+    container_name: anfisa-historical
+    <<: *common_parameters
+    image: apache/druid:0.19.0
+    volumes:
+      - DRUID_WORK/data/:/opt/data/
+      - DRUID_WORK/historical-var/:/opt/druid/var/
+    depends_on:
+      - zookeeper
+      - coordinator
+    user: root
+    ports:
+      - "8083:8083"
+    command:
+      - historical
+    environment:
+      - DRUID_XMS=256m
+      - DRUID_XMX=2g
+      - druid_processing_numMergeBuffers=2
+      - druid_processing_numThreads=2
+    env_file:
+      - .env
+    restart: always
+
+  middlemanager:
+    container_name: anfisa-middlemanager
+    <<: *common_parameters
+    image: apache/druid:0.19.0
+    user: root
+    volumes:
+      - DRUID_WORK/data/:/opt/data/
+      - DRUID_WORK/middlemanager/:/opt/druid/var
+      - ASETUP_PATH/vault:/anfisa/a-setup/vault
+      - ASETUP_PATH/../data/:/anfisa/data/
+    depends_on:
+      - zookeeper
+      - coordinator
+    ports:
+      - "8091:8091"
+    command:
+      - middleManager
+    environment:
+      - DRUID_XMS=64m
+      - DRUID_XMX=256m
+      - druid_indexer_fork_property_druid_processing_buffer_sizeBytes=100000000
+      - druid_indexer_fork_property_druid_processing_numThreads=1
+    env_file:
+      - .env
+    restart: always
+
+  router:
+    container_name: anfisa-router
+    <<: *common_parameters
+    image: apache/druid:0.19.0
+    user: root
+    volumes:
+      - DRUID_WORK/router/:/opt/druid/var
+    depends_on:
+      - zookeeper
+      - coordinator
+    ports:
+      - "8888:8888"
+    command:
+      - router
+    environment:
+      - DRUID_XMS=128m
+      - DRUID_XMX=256m
+    env_file:
+      - .env
+    restart: always
