@@ -3,13 +3,13 @@
 # Declare variables to be passed into your templates.
 
 nameOverride: ""
-fullnameOverride: ""
+fullnameOverride: "anfisa-front"
 
 replicaCount: 1
 
 image:
   repository: forome.azurecr.io/anfisa-react-client
-  tag: v0.8.43
+  tag: v0.8.48
   pullPolicy: IfNotPresent
 
 env:
