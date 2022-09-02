@@ -1,0 +1,46 @@
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: anfisa-workdir-claim
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{.Values.persistent.anfisaWorkdir.size }}
+  volumeMode: Filesystem
+  storageClassName: {{ default .Values.persistent.anfisaWorkdir.storageClassName "" }}
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: forome-datasets-pvc
+  annotations:
+    ibm.io/auto-create-bucket: "false"
+    ibm.io/auto-delete-bucket: "false"
+    ibm.io/bucket: forome-dataset-private
+    ibm.io/secret-name: cos-write-access
+spec:
+  storageClassName: {{ default .Values.persistent.foromeDatasets.storageClassName "" }}
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: "{{.Values.persistent.foromeDatasets.size }}"
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: forome-anfisa-s3-pvc
+  annotations:
+    ibm.io/auto-create-bucket: "true"
+    ibm.io/auto-delete-bucket: "false"
+    ibm.io/bucket: forome-anfisa
+    ibm.io/secret-name: cos-write-access
+spec:
+  storageClassName: {{ default .Values.persistent.foromeAnfisaS3.storageClassName "" }}
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: "{{.Values.persistent.foromeAnfisaS3.size }}"

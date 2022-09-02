@@ -1,0 +1,14 @@
+apiVersion: v2
+name: anfisa
+description: A Helm chart for Kubernetes
+version: "0.1.0"
+appVersion: "0.7.8"
+dependencies:
+- name: anfisa-front
+  version: 0.7.8
+  repository: "file://./charts/anfisa-bck"
+  condition: druid.enabled
+- name: anfisa-front
+  version: 0.8.48
+  repository: "file://./charts/anfisa-front"
+  condition: druid.enabled

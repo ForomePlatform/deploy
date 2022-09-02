@@ -1,0 +1,2168 @@
+---
+# Source: anfisa/charts/anfisa-back/charts/druid/charts/zookeeper/templates/poddisruptionbudget.yaml
+apiVersion: policy/v1beta1
+kind: PodDisruptionBudget
+metadata:
+  name: anfisa-zookeeper
+  namespace: anfisa-qa
+  labels:
+    app.kubernetes.io/name: zookeeper
+    helm.sh/chart: zookeeper-6.7.2
+    app.kubernetes.io/instance: anfisa
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: zookeeper
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: zookeeper
+      app.kubernetes.io/instance: anfisa
+      app.kubernetes.io/component: zookeeper
+  maxUnavailable: 1
+---
+# Source: anfisa/charts/anfisa-back/charts/druid/charts/mongodb/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: anfisa-mongodb
+  namespace: anfisa-qa
+  labels:
+    app.kubernetes.io/name: mongodb
+    helm.sh/chart: mongodb-10.13.0
+    app.kubernetes.io/instance: anfisa
+    app.kubernetes.io/managed-by: Helm
+secrets:
+  - name: anfisa-mongodb
+---
+# Source: anfisa/charts/anfisa-back/charts/druid/charts/mysql/templates/secret.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mysql-secret
+  labels:
+    helm.sh/chart: mysql-0.1
+    app-name: mysql
+    component: "database-server"
+    hostNetwork: "false"
+    internal-service: "true"
+    managed-by: chynten
+    created-by: chynten
+    version: "8"
+type: Opaque
+data:
+  mysql-root-password: "dXNlcg=="
+  mysql-password: "dXNlcg=="
+---
+# Source: anfisa/charts/anfisa-back/charts/druid/charts/postgresql/templates/secrets.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: postgresql-secret
+  labels:
+  namespace: 
+type: Opaque
+data:
+  postgresql-postgres-password: ZHJ1aWRyb290Cg==
+  postgresql-password: ZHJ1aWQK
+---
+# Source: anfisa/charts/anfisa-back/templates/secrets.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: anfisa-registry
+type: kubernetes.io/dockerconfigjson
+data:
+  .dockerconfigjson: eyJhdXRocyI6IHsiJSFzKDxuaWw+KSI6IHsiYXV0aCI6ICJKU0Z6S0R4dWFXdytLVG9sSVhNb1BHNXBiRDRwIn19fQ==
+---
+# Source: anfisa/charts/anfisa-front/templates/secrets.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: anfisa-front-registry
+  labels:
+    helm.sh/chart: anfisa-front-0.8.48
+    app.kubernetes.io/name: anfisa-front
+    app.kubernetes.io/instance: anfisa
+    app.kubernetes.io/version: "0.8.48"
+    app.kubernetes.io/managed-by: Helm
+type: kubernetes.io/dockerconfigjson
+data:
+  .dockerconfigjson: eyJhdXRocyI6IHsiJSFzKDxuaWw+KSI6IHsiYXV0aCI6ICJKU0Z6S0R4dWFXdytLVG9sSVhNb1BHNXBiRDRwIn19fQ==
+---
+# Source: anfisa/charts/anfisa-back/templates/configmap.yaml
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: igv-dir
+  namespace: anfisa-qa
+data:
+  igv.dir: |
+    [
+        {"dataset": "xl_PGP3140_wgs_NIST-4_2",
+            "url": "https://forome-bam.s3.us-south.cloud-object-storage.appdomain.cloud/GRCh38/{name}.sorted.bam"},
+        {"dataset": "PGP3140_wgs_panel_hl",
+            "url": "https://forome-bam.s3.us-south.cloud-object-storage.appdomain.cloud/GRCh38/{name}.sorted.bam"},
+        {"dataset": "xl_PGP3140_wgs_panel_hl",
+            "url": "https://forome-bam.s3.us-south.cloud-object-storage.appdomain.cloud/GRCh38/{name}.sorted.bam"}
+    ]
+---
+# Source: anfisa/charts/anfisa-back/templates/pvc.yaml
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: anfisa-workdir-claim
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Gi
+  volumeMode: Filesystem
+  storageClassName:
+---
+# Source: anfisa/charts/anfisa-back/templates/pvc.yaml
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: forome-datasets-pvc
+  annotations:
+    ibm.io/auto-create-bucket: "false"
+    ibm.io/auto-delete-bucket: "false"
+    ibm.io/bucket: forome-dataset-private
+    ibm.io/secret-name: cos-write-access
+spec:
+  storageClassName: 
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: "100Gi"
+---
+# Source: anfisa/charts/anfisa-back/templates/pvc.yaml
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: forome-anfisa-s3-pvc
+  annotations:
+    ibm.io/auto-create-bucket: "true"
+    ibm.io/auto-delete-bucket: "false"
+    ibm.io/bucket: forome-anfisa
+    ibm.io/secret-name: cos-write-access
+spec:
+  storageClassName: 
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: "100Gi"
+---
+# Source: anfisa/charts/anfisa-back/charts/druid/charts/mongodb/templates/standalone/svc.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: anfisa-mongodb
+  namespace: anfisa-qa
+  labels:
+    app.kubernetes.io/name: mongodb
+    helm.sh/chart: mongodb-10.13.0
+    app.kubernetes.io/instance: anfisa
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: mongodb
+spec:
+  type: ClusterIP
+  ports:
+    - name: mongodb
+      port: 27017
+      targetPort: mongodb
+      nodePort: null
+  selector:
+    app.kubernetes.io/name: mongodb
+    app.kubernetes.io/instance: anfisa
+    app.kubernetes.io/component: mongodb
+---
+# Source: anfisa/charts/anfisa-back/charts/druid/charts/mysql/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql
+  labels:
+    helm.sh/chart: mysql-0.1
+    app-name: mysql
+    component: "database-server"
+    hostNetwork: "false"
+    internal-service: "true"
+    managed-by: chynten
+    created-by: chynten
+    version: "8"
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3306
+      targetPort: mysql
+      protocol: TCP
+      name: mysql
+  selector:
+    app-name: mysql
+---
+# Source: anfisa/charts/anfisa-back/charts/druid/charts/postgresql/templates/svc-headless.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: anfisa-postgresql-headless
+  labels:
+    app.kubernetes.io/name: postgresql
+    helm.sh/chart: postgresql-10.12.7
+    app.kubernetes.io/instance: anfisa
+    app.kubernetes.io/managed-by: Helm
+    # Use this annotation in addition to the actual publishNotReadyAddresses
+    # field below because the annotation will stop being respected soon but the
+    # field is broken in some versions of Kubernetes:
+    # https://github.com/kubernetes/kubernetes/issues/58662
+    service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
+  namespace: anfisa-qa
+spec:
+  type: ClusterIP
+  clusterIP: None
+  # We want all pods in the StatefulSet to have their addresses published for
+  # the sake of the other Postgresql pods even before they're ready, since they
+  # have to be able to talk to each other in order to become ready.
+  publishNotReadyAddresses: true
+  ports:
+    - name: tcp-postgresql
+      port: 5432
+      targetPort: tcp-postgresql
+  selector:
+    app.kubernetes.io/name: postgresql
+    app.kubernetes.io/instance: anfisa
+---
+# Source: anfisa/charts/anfisa-back/charts/druid/charts/postgresql/templates/svc.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: anfisa-postgresql
+  labels:
+    app.kubernetes.io/name: postgresql
+    helm.sh/chart: postgresql-10.12.7
+    app.kubernetes.io/instance: anfisa
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+  namespace: anfisa-qa
+spec:
+  type: ClusterIP
+  ports:
+    - name: tcp-postgresql
+      port: 5432
+      targetPort: tcp-postgresql
+  selector:
+    app.kubernetes.io/name: postgresql
+    app.kubernetes.io/instance: anfisa
+    role: primary
+---
+# Source: anfisa/charts/anfisa-back/charts/druid/charts/zookeeper/templates/svc-headless.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: anfisa-zookeeper-headless
+  namespace: anfisa-qa
+  labels:
+    app.kubernetes.io/name: zookeeper
+    helm.sh/chart: zookeeper-6.7.2
+    app.kubernetes.io/instance: anfisa
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: zookeeper
+spec:
+  type: ClusterIP
+  clusterIP: None
+  publishNotReadyAddresses: true
+  ports:
+    
+    - name: tcp-client
+      port: 2181
+      targetPort: client
+    
+    
+    - name: follower
+      port: 2888
+      targetPort: follower
+    - name: tcp-election
+      port: 3888
+      targetPort: election
+  selector:
+    app.kubernetes.io/name: zookeeper
+    app.kubernetes.io/instance: anfisa
+    app.kubernetes.io/component: zookeeper
+---
+# Source: anfisa/charts/anfisa-back/charts/druid/charts/zookeeper/templates/svc.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: anfisa-zookeeper
+  namespace: anfisa-qa
+  labels:
+    app.kubernetes.io/name: zookeeper
+    helm.sh/chart: zookeeper-6.7.2
+    app.kubernetes.io/instance: anfisa
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: zookeeper
+spec:
+  type: ClusterIP
+  ports:
+    
+    - name: tcp-client
+      port: 2181
+      targetPort: client
+    
+    
+    - name: follower
+      port: 2888
+      targetPort: follower
+    - name: tcp-election
+      port: 3888
+      targetPort: election
+  selector:
+    app.kubernetes.io/name: zookeeper
+    app.kubernetes.io/instance: anfisa
+    app.kubernetes.io/component: zookeeper
+---
+# Source: anfisa/charts/anfisa-back/charts/druid/templates/broker/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: anfisa-druid-broker
+  labels:
+    app: druid
+    chart: druid-0.3.12
+    component: broker
+    release: anfisa
+    heritage: Helm
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8082
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app: druid
+    release: anfisa
+    component: broker
+---
+# Source: anfisa/charts/anfisa-back/charts/druid/templates/coordinator/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: anfisa-druid-coordinator
+  labels:
+    app: druid
+    chart: druid-0.3.12
+    component: coordinator
+    release: anfisa
+    heritage: Helm
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8081
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app: druid
+    release: anfisa
+    component: coordinator
+---
+# Source: anfisa/charts/anfisa-back/charts/druid/templates/historical/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: anfisa-druid-historical
+  labels:
+    app: druid
+    chart: druid-0.3.12
+    component: historical
+    release: anfisa
+    heritage: Helm
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8083
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app: druid
+    release: anfisa
+    component: historical
+---
+# Source: anfisa/charts/anfisa-back/charts/druid/templates/middleManager/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: anfisa-druid-middle-manager
+  labels:
+    app: druid
+    chart: druid-0.3.12
+    component: middle-manager
+    release: anfisa
+    heritage: Helm
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8091
+      targetPort: http
+      protocol: TCP
+      name: http
+    - port: 8100
+      targetPort: 8100
+      name: port-8100
+      protocol: TCP
+    - port: 8101
+      targetPort: 8101
+      name: port-8101
+      protocol: TCP
+    - port: 8102
+      targetPort: 8102
+      name: port-8102
+      protocol: TCP
+    - port: 8103
+      targetPort: 8103
+      name: port-8103
+      protocol: TCP
+    - port: 8104
+      targetPort: 8104
+      name: port-8104
+      protocol: TCP
+    - port: 8105
+      targetPort: 8105
+      name: port-8105
+      protocol: TCP
+    - port: 8106
+      targetPort: 8106
+      name: port-8106
+      protocol: TCP
+    - port: 8107
+      targetPort: 8107
+      name: port-8107
+      protocol: TCP
+    - port: 8108
+      targetPort: 8108
+      name: port-8108
+      protocol: TCP
+    - port: 8109
+      targetPort: 8109
+      name: port-8109
+      protocol: TCP
+    - port: 8110
+      targetPort: 8110
+      name: port-8110
+      protocol: TCP
+    - port: 8111
+      targetPort: 8111
+      name: port-8111
+      protocol: TCP
+    - port: 8112
+      targetPort: 8112
+      name: port-8112
+      protocol: TCP
+    - port: 8113
+      targetPort: 8113
+      name: port-8113
+      protocol: TCP
+    - port: 8114
+      targetPort: 8114
+      name: port-8114
+      protocol: TCP
+    - port: 8115
+      targetPort: 8115
+      name: port-8115
+      protocol: TCP
+    - port: 8116
+      targetPort: 8116
+      name: port-8116
+      protocol: TCP
+    - port: 8117
+      targetPort: 8117
+      name: port-8117
+      protocol: TCP
+    - port: 8118
+      targetPort: 8118
+      name: port-8118
+      protocol: TCP
+    - port: 8119
+      targetPort: 8119
+      name: port-8119
+      protocol: TCP
+    - port: 8120
+      targetPort: 8120
+      name: port-8120
+      protocol: TCP
+    - port: 8121
+      targetPort: 8121
+      name: port-8121
+      protocol: TCP
+    - port: 8122
+      targetPort: 8122
+      name: port-8122
+      protocol: TCP
+    - port: 8123
+      targetPort: 8123
+      name: port-8123
+      protocol: TCP
+    - port: 8124
+      targetPort: 8124
+      name: port-8124
+      protocol: TCP
+    - port: 8125
+      targetPort: 8125
+      name: port-8125
+      protocol: TCP
+    - port: 8126
+      targetPort: 8126
+      name: port-8126
+      protocol: TCP
+    - port: 8127
+      targetPort: 8127
+      name: port-8127
+      protocol: TCP
+    - port: 8128
+      targetPort: 8128
+      name: port-8128
+      protocol: TCP
+    - port: 8129
+      targetPort: 8129
+      name: port-8129
+      protocol: TCP
+    - port: 8130
+      targetPort: 8130
+      name: port-8130
+      protocol: TCP
+    - port: 8131
+      targetPort: 8131
+      name: port-8131
+      protocol: TCP
+    - port: 8132
+      targetPort: 8132
+      name: port-8132
+      protocol: TCP
+    - port: 8133
+      targetPort: 8133
+      name: port-8133
+      protocol: TCP
+    - port: 8134
+      targetPort: 8134
+      name: port-8134
+      protocol: TCP
+    - port: 8135
+      targetPort: 8135
+      name: port-8135
+      protocol: TCP
+    - port: 8136
+      targetPort: 8136
+      name: port-8136
+      protocol: TCP
+    - port: 8137
+      targetPort: 8137
+      name: port-8137
+      protocol: TCP
+    - port: 8138
+      targetPort: 8138
+      name: port-8138
+      protocol: TCP
+    - port: 8139
+      targetPort: 8139
+      name: port-8139
+      protocol: TCP
+    - port: 8140
+      targetPort: 8140
+      name: port-8140
+      protocol: TCP
+    - port: 8141
+      targetPort: 8141
+      name: port-8141
+      protocol: TCP
+    - port: 8142
+      targetPort: 8142
+      name: port-8142
+      protocol: TCP
+    - port: 8143
+      targetPort: 8143
+      name: port-8143
+      protocol: TCP
+    - port: 8144
+      targetPort: 8144
+      name: port-8144
+      protocol: TCP
+    - port: 8145
+      targetPort: 8145
+      name: port-8145
+      protocol: TCP
+    - port: 8146
+      targetPort: 8146
+      name: port-8146
+      protocol: TCP
+    - port: 8147
+      targetPort: 8147
+      name: port-8147
+      protocol: TCP
+    - port: 8148
+      targetPort: 8148
+      name: port-8148
+      protocol: TCP
+    - port: 8149
+      targetPort: 8149
+      name: port-8149
+      protocol: TCP
+    - port: 8150
+      targetPort: 8150
+      name: port-8150
+      protocol: TCP
+    - port: 8151
+      targetPort: 8151
+      name: port-8151
+      protocol: TCP
+    - port: 8152
+      targetPort: 8152
+      name: port-8152
+      protocol: TCP
+    - port: 8153
+      targetPort: 8153
+      name: port-8153
+      protocol: TCP
+    - port: 8154
+      targetPort: 8154
+      name: port-8154
+      protocol: TCP
+    - port: 8155
+      targetPort: 8155
+      name: port-8155
+      protocol: TCP
+    - port: 8156
+      targetPort: 8156
+      name: port-8156
+      protocol: TCP
+    - port: 8157
+      targetPort: 8157
+      name: port-8157
+      protocol: TCP
+    - port: 8158
+      targetPort: 8158
+      name: port-8158
+      protocol: TCP
+    - port: 8159
+      targetPort: 8159
+      name: port-8159
+      protocol: TCP
+    - port: 8160
+      targetPort: 8160
+      name: port-8160
+      protocol: TCP
+    - port: 8161
+      targetPort: 8161
+      name: port-8161
+      protocol: TCP
+    - port: 8162
+      targetPort: 8162
+      name: port-8162
+      protocol: TCP
+    - port: 8163
+      targetPort: 8163
+      name: port-8163
+      protocol: TCP
+    - port: 8164
+      targetPort: 8164
+      name: port-8164
+      protocol: TCP
+    - port: 8165
+      targetPort: 8165
+      name: port-8165
+      protocol: TCP
+    - port: 8166
+      targetPort: 8166
+      name: port-8166
+      protocol: TCP
+    - port: 8167
+      targetPort: 8167
+      name: port-8167
+      protocol: TCP
+    - port: 8168
+      targetPort: 8168
+      name: port-8168
+      protocol: TCP
+    - port: 8169
+      targetPort: 8169
+      name: port-8169
+      protocol: TCP
+    - port: 8170
+      targetPort: 8170
+      name: port-8170
+      protocol: TCP
+    - port: 8171
+      targetPort: 8171
+      name: port-8171
+      protocol: TCP
+    - port: 8172
+      targetPort: 8172
+      name: port-8172
+      protocol: TCP
+    - port: 8173
+      targetPort: 8173
+      name: port-8173
+      protocol: TCP
+    - port: 8174
+      targetPort: 8174
+      name: port-8174
+      protocol: TCP
+    - port: 8175
+      targetPort: 8175
+      name: port-8175
+      protocol: TCP
+    - port: 8176
+      targetPort: 8176
+      name: port-8176
+      protocol: TCP
+    - port: 8177
+      targetPort: 8177
+      name: port-8177
+      protocol: TCP
+    - port: 8178
+      targetPort: 8178
+      name: port-8178
+      protocol: TCP
+    - port: 8179
+      targetPort: 8179
+      name: port-8179
+      protocol: TCP
+    - port: 8180
+      targetPort: 8180
+      name: port-8180
+      protocol: TCP
+    - port: 8181
+      targetPort: 8181
+      name: port-8181
+      protocol: TCP
+    - port: 8182
+      targetPort: 8182
+      name: port-8182
+      protocol: TCP
+    - port: 8183
+      targetPort: 8183
+      name: port-8183
+      protocol: TCP
+    - port: 8184
+      targetPort: 8184
+      name: port-8184
+      protocol: TCP
+    - port: 8185
+      targetPort: 8185
+      name: port-8185
+      protocol: TCP
+    - port: 8186
+      targetPort: 8186
+      name: port-8186
+      protocol: TCP
+    - port: 8187
+      targetPort: 8187
+      name: port-8187
+      protocol: TCP
+    - port: 8188
+      targetPort: 8188
+      name: port-8188
+      protocol: TCP
+    - port: 8189
+      targetPort: 8189
+      name: port-8189
+      protocol: TCP
+    - port: 8190
+      targetPort: 8190
+      name: port-8190
+      protocol: TCP
+    - port: 8191
+      targetPort: 8191
+      name: port-8191
+      protocol: TCP
+    - port: 8192
+      targetPort: 8192
+      name: port-8192
+      protocol: TCP
+    - port: 8193
+      targetPort: 8193
+      name: port-8193
+      protocol: TCP
+    - port: 8194
+      targetPort: 8194
+      name: port-8194
+      protocol: TCP
+    - port: 8195
+      targetPort: 8195
+      name: port-8195
+      protocol: TCP
+    - port: 8196
+      targetPort: 8196
+      name: port-8196
+      protocol: TCP
+    - port: 8197
+      targetPort: 8197
+      name: port-8197
+      protocol: TCP
+    - port: 8198
+      targetPort: 8198
+      name: port-8198
+      protocol: TCP
+
+  selector:
+    app: druid
+    release: anfisa
+    component: middle-manager
+---
+# Source: anfisa/charts/anfisa-back/charts/druid/templates/router/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: router
+  labels:
+    app: druid
+    component: router
+spec:
+  ports:
+    - name: router
+      protocol: TCP
+      port: 80
+      targetPort: http
+
+  selector:
+    app: druid
+    component: router
+  type: ClusterIP
+  sessionAffinity: None
+---
+# Source: anfisa/charts/anfisa-back/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: anfisa-backend
+  labels:
+    app: anfisa-back
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 80
+      protocol: TCP
+      name: anfisa-backend
+  sessionAffinity: None
+  selector:
+    app: anfisa-back
+---
+# Source: anfisa/charts/anfisa-front/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: anfisa-anfisa-front
+  labels:
+    helm.sh/chart: anfisa-front-0.8.48
+    app.kubernetes.io/name: anfisa-front
+    app.kubernetes.io/instance: anfisa
+    app.kubernetes.io/version: "0.8.48"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: anfisa-front
+    app.kubernetes.io/instance: anfisa
+---
+# Source: anfisa/charts/anfisa-back/charts/druid/templates/broker/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: anfisa-druid-broker
+  labels:
+    app: druid
+    chart: druid-0.3.12
+    component: broker
+    release: anfisa
+    heritage: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: druid
+      release: anfisa
+      component: broker
+  template:
+    metadata:
+      labels:
+        app: druid
+        release: anfisa
+        component: broker        
+    spec:
+      containers:
+        - name: anfisa-druid-broker
+          image: "apache/druid:0.20.1"
+          imagePullPolicy: IfNotPresent
+          args: [ "broker" ]
+          env:
+          - name: druid_zk_service_host
+            value: "anfisa-zookeeper-headless:2181"
+          - name: JAVA_OPTS
+            value: 
+          - name: DRUID_MAXDIRECTMEMORYSIZE
+            value: "6g"
+          - name: DRUID_MAXNEWSIZE
+            value: "250m"
+          - name: DRUID_NEWSIZE
+            value: "250m"
+          - name: DRUID_XMS
+            value: "1g"
+          - name: DRUID_XMX
+            value: "1g"
+          - name: druid_coordinator_balancer_strategy
+            value: "cachingCost"
+          - name: druid_indexer_fork_property_druid_processing_buffer_sizeBytes
+            value: "10000000"
+          - name: druid_indexer_fork_property_druid_processing_numMergeBuffers
+            value: "2"
+          - name: druid_indexer_fork_property_druid_processing_numThreads
+            value: "1"
+          - name: druid_indexer_logs_directory
+            value: "/data/anfisa/var/druid/indexing-logs"
+          - name: druid_indexer_logs_type
+            value: "file"
+          - name: druid_indexer_queue_startDelay
+            value: "PT30S"
+          - name: druid_indexer_runner_javaOptsArray
+            value: "[\"-server\", \"-Xmx1g\", \"-Xms1g\", \"-XX:MaxDirectMemorySize=3g\", \"-Duser.timezone=UTC\", \"-Dfile.encoding=UTF-8\", \"-Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager\"]"
+          - name: druid_processing_buffer_sizeBytes
+            value: "10000000"
+          - name: druid_processing_numMergeBuffers
+            value: "4"
+          - name: druid_processing_numThreads
+            value: "16"
+          - name: druid_server_maxSize
+            value: "8000000000"
+          - name: druid_storage_disableAcl
+            value: "true"
+          - name: druid_storage_storageDirectory
+            value: "/data/anfisa/var/druid/segments"
+          - name: druid_storage_type
+            value: "local"
+          - name: druid_worker_capacity
+            value: "4"
+          - name: druid_extensions_loadList
+            value: "[\"druid-histogram\",\"druid-datasketches\",\"druid-lookups-cached-global\",\"postgresql-metadata-storage\",\"druid-kafka-indexing-service\",\"druid-parquet-extensions\",\"druid-kinesis-indexing-service\"]"
+          ports:
+            - name: http
+              containerPort: 8082
+              protocol: TCP
+          livenessProbe:
+            initialDelaySeconds: 60
+            httpGet:
+              path: /status/health
+              port: 8082
+          readinessProbe:
+            initialDelaySeconds: 60
+            httpGet:
+              path: /status/selfDiscovered
+              port: 8082
+          resources:
+            {}
+      securityContext:
+        fsGroup: 1000
+        runAsUser: 1000760000
+        runAsGroup: 1000
+---
+# Source: anfisa/charts/anfisa-back/charts/druid/templates/coordinator/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: anfisa-druid-coordinator
+  labels:
+    app: druid
+    chart: druid-0.3.12
+    component: coordinator
+    release: anfisa
+    heritage: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: druid
+      release: anfisa
+      component: coordinator
+  template:
+    metadata:
+      labels:
+        app: druid
+        release: anfisa
+        component: coordinator 
+    spec:
+      containers:
+      - name: anfisa-druid-coordinator
+        image: "apache/druid:0.20.1"
+        imagePullPolicy: IfNotPresent
+        volumeMounts:
+        - name: druid-data
+          mountPath: /data/anfisa
+        args: [ "coordinator" ]
+        env:
+        - name: druid_zk_service_host
+          value: anfisa-zookeeper-headless:2181
+        - name: JAVA_OPTS
+          value: 
+        - name: DRUID_MAXDIRECTMEMORYSIZE
+          value: "6g"
+        - name: DRUID_MAXNEWSIZE
+          value: "250m"
+        - name: DRUID_NEWSIZE
+          value: "250m"
+        - name: DRUID_XMS
+          value: "256m"
+        - name: DRUID_XMX
+          value: "256m"
+        - name: druid_coordinator_balancer_strategy
+          value: "cachingCost"
+        - name: druid_indexer_fork_property_druid_processing_buffer_sizeBytes
+          value: "10000000"
+        - name: druid_indexer_fork_property_druid_processing_numMergeBuffers
+          value: "2"
+        - name: druid_indexer_fork_property_druid_processing_numThreads
+          value: "1"
+        - name: druid_indexer_logs_directory
+          value: "/data/anfisa/var/druid/indexing-logs"
+        - name: druid_indexer_logs_type
+          value: "file"
+        - name: druid_indexer_queue_startDelay
+          value: "PT30S"
+        - name: druid_indexer_runner_javaOptsArray
+          value: "[\"-server\", \"-Xmx1g\", \"-Xms1g\", \"-XX:MaxDirectMemorySize=3g\", \"-Duser.timezone=UTC\", \"-Dfile.encoding=UTF-8\", \"-Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager\"]"
+        - name: druid_processing_buffer_sizeBytes
+          value: "10000000"
+        - name: druid_processing_numMergeBuffers
+          value: "4"
+        - name: druid_processing_numThreads
+          value: "16"
+        - name: druid_server_maxSize
+          value: "8000000000"
+        - name: druid_storage_disableAcl
+          value: "true"
+        - name: druid_storage_storageDirectory
+          value: "/data/anfisa/var/druid/segments"
+        - name: druid_storage_type
+          value: "local"
+        - name: druid_worker_capacity
+          value: "4"
+        - name: druid_extensions_loadList
+          value: "[\"druid-histogram\",\"druid-datasketches\",\"druid-lookups-cached-global\",\"postgresql-metadata-storage\",\"druid-kafka-indexing-service\",\"druid-parquet-extensions\",\"druid-kinesis-indexing-service\"]"
+
+        ports:
+          - name: http
+            containerPort: 8081
+            protocol: TCP
+        livenessProbe:
+          initialDelaySeconds: 60
+          httpGet:
+            path: /status/health
+            port: 8081
+        readinessProbe:
+          initialDelaySeconds: 60
+          httpGet:
+            path: /status/selfDiscovered
+            port: 8081
+        resources:
+            {}
+      volumes:
+      - name: druid-data
+        persistentVolumeClaim:
+          claimName: forome-anfisa-s3-pvc
+
+      securityContext:
+        fsGroup: 1000
+        runAsUser: 1000760000
+        runAsGroup: 1000
+---
+# Source: anfisa/charts/anfisa-back/charts/druid/templates/router/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: anfisa-druid-router
+#  name: druid-router-test
+  labels:
+    app: druid
+    chart: druid-0.3.12
+    component: router
+    release: anfisa
+    heritage: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: druid
+      release: anfisa
+      component: router
+  template:
+    metadata:
+      labels:
+        app: druid
+        release: anfisa
+        component: router
+    spec:
+      containers:
+        - name: anfisa-druid-router
+          image: "apache/druid:0.20.1"
+          imagePullPolicy: IfNotPresent
+          args: [ "router" ]
+          env:
+          - name: druid_zk_service_host
+            value: "anfisa-zookeeper-headless:2181"
+          - name: druid_extensions_loadList
+            value: "[\"druid-histogram\",\"druid-datasketches\",\"druid-lookups-cached-global\",\"postgresql-metadata-storage\",\"druid-kafka-indexing-service\",\"druid-parquet-extensions\",\"druid-kinesis-indexing-service\"]"
+          - name: JAVA_OPTS
+            value: 
+          - name: druid_coordinator_balancer_strategy
+            value: "cachingCost"
+          - name: druid_indexer_fork_property_druid_processing_buffer_sizeBytes
+            value: "10000000"
+          - name: druid_indexer_fork_property_druid_processing_numMergeBuffers
+            value: "2"
+          - name: druid_indexer_fork_property_druid_processing_numThreads
+            value: "1"
+          - name: druid_indexer_logs_directory
+            value: "/data/anfisa/var/druid/indexing-logs"
+          - name: druid_indexer_logs_type
+            value: "file"
+          - name: druid_indexer_queue_startDelay
+            value: "PT30S"
+          - name: druid_indexer_runner_javaOptsArray
+            value: "[\"-server\", \"-Xmx1g\", \"-Xms1g\", \"-XX:MaxDirectMemorySize=3g\", \"-Duser.timezone=UTC\", \"-Dfile.encoding=UTF-8\", \"-Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager\"]"
+          - name: druid_processing_buffer_sizeBytes
+            value: "10000000"
+          - name: druid_processing_numMergeBuffers
+            value: "4"
+          - name: druid_processing_numThreads
+            value: "16"
+          - name: druid_server_maxSize
+            value: "8000000000"
+          - name: druid_storage_disableAcl
+            value: "true"
+          - name: druid_storage_storageDirectory
+            value: "/data/anfisa/var/druid/segments"
+          - name: druid_storage_type
+            value: "local"
+          - name: druid_worker_capacity
+            value: "4"
+          - name: druid_router_managementProxy_enabled
+            value: "true"
+          ports:
+            - name: http
+              containerPort: 8888
+              protocol: TCP
+          livenessProbe:
+            initialDelaySeconds: 60
+            httpGet:
+              path: /status/health
+              port: 8888
+          readinessProbe:
+            initialDelaySeconds: 60
+            httpGet:
+              path: /status/selfDiscovered
+              port: 8888
+          resources:
+            {}
+
+      securityContext:
+        fsGroup: 1000
+        runAsUser: 1000760000
+        runAsGroup: 1000
+---
+# Source: anfisa/charts/anfisa-back/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: anfisa-back
+  labels:
+    app: anfisa-back
+    chart: anfisa
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: anfisa-back
+  template:
+    metadata:
+      labels:
+        app: anfisa-back
+        app.kubernetes.io/name: anfisa-back
+        helm.sh/chart: "anfisa-back-0.7.8"
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/instance: anfisa
+        app.kubernetes.io/version: 0.7.8
+        app.kubernetes.io/component: backend
+    spec:
+      serviceAccountName: default
+      securityContext:
+        fsGroup: 0
+        runAsUser: 0
+        runAsGroup: 0
+      imagePullSecrets:
+        - name: anfisa-registry
+      containers:
+        - name: anfisa-back
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          env:
+            - name: "ANFISA_COORD_HOST"
+              value: "anfisa-druid-coordinator"
+            - name: "ANFISA_ROUTER_HOST"
+              value: "router"
+            - name: "ANFISA_MONGO_HOST"
+              value: "anfisa-mongodb"
+            - name: "UWSGI_BACKEND"
+              value: "127.0.0.1:3041"
+            - name: "ANFISA_WORK"
+              value: "/anfisa/a-setup"
+            - name: "ANFISA_SRC"
+              value: "/anfisa"
+            - name: "ANFISA_HTML_APP_BASE"
+              value: "/app"
+            - name: "ANFISA_HTML_TITLE"
+              value: "Anfisa"
+            - name: "ANFISA_IGVDIR"
+              value: "/anfisa/igv.dir"
+            - name: "ANFISA_DRUIDVAULTPREFIX"
+              value: "demo_v7"
+            - name: "ANFISA_DRUIDINDEX"
+              value: "http://anfisa-druid-coordinator:8081/druid/indexer/v1/task"
+            - name: "ANFISA_DRUIDCOORD"
+              value: "http://anfisa-druid-coordinator:8081/druid/coordinator/v1"
+            - name: "ANFISA_DRUIDSQL"
+              value: "http://router:80/druid/v2/sql"
+            - name: "ANFISA_DRUIDQUERY"
+              value: "http://router:80/druid/v2"
+            - name: "ANFISA_DRUIDCOPYDIR"
+              value: "/data/anfisa"
+            - name: "ANFISA_MONGOHOST"
+              value: "anfisa-mongodb"
+            - name: "ANFISA_MONGODB"
+              value: "Anfisa1"
+            - name: "ANFISA_MONGOPORT"
+              value: "27017"
+          ports:
+          image: "forome.azurecr.io/anfisa:v.0.7.8"
+          imagePullPolicy: IfNotPresent
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          tty: true
+          stdin: true
+          # command: [ "/bin/bash" ]
+          # args: [ "-c", "sleep infinity" ]
+          # command: [ "/entrypoint.sh" ]
+          # args: [ "/usr/local/bin/supervisord" ]
+          volumeMounts:
+          - name: forome-anfisa
+            mountPath: /data/anfisa/
+          - name: anfisa-workdir
+            mountPath: /anfisa/a-setup/
+          - name: forome-datasets-pvc
+            mountPath: /mnt/forome-datasets
+          - name: igv-dir
+            mountPath: /anfisa/igv.dir
+            subPath: igv.dir
+      volumes:
+      - name: forome-anfisa
+        persistentVolumeClaim:
+          claimName: forome-anfisa-s3-pvc
+      - name: anfisa-workdir
+        persistentVolumeClaim:
+          claimName: anfisa-workdir-claim
+      - name: forome-datasets-pvc
+        persistentVolumeClaim:
+          claimName: forome-datasets-pvc
+      - name: igv-dir
+        configMap:
+          name: igv-dir
+          defaultMode: 0666
+      terminationGracePeriodSeconds: 5
+---
+# Source: anfisa/charts/anfisa-front/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: anfisa-anfisa-front
+  labels:
+    helm.sh/chart: anfisa-front-0.8.48
+    app.kubernetes.io/name: anfisa-front
+    app.kubernetes.io/instance: anfisa
+    app.kubernetes.io/version: "0.8.48"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: anfisa-front
+      app.kubernetes.io/instance: anfisa
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: anfisa-front
+        app.kubernetes.io/instance: anfisa
+        app.kubernetes.io/name: anfisa-anfisa-front
+        helm.sh/chart: "anfisa-front-0.8.48"
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/instance: anfisa
+        app.kubernetes.io/version: 0.8.48
+        app.kubernetes.io/component: frontend
+    spec:
+      imagePullSecrets:
+        - name: anfisa-front-registry
+      serviceAccountName: default
+      securityContext:
+        fsGroup: 1000
+      containers:
+        - name: anfisa-front
+          securityContext:
+            runAsUser: 0
+          image: "forome.azurecr.io/anfisa-react-client:v0.8.43"
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: "URL_BACKEND"
+              value: "http://anfisa-backend"
+            - name: "REACT_APP_URL_BACKEND"
+              value: "https://anfisa.example.com/app"
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          # volumeMounts:
+          # - name: front-env-config
+          #   mountPath: /usr/share/nginx/html/anfisa/env-config.js
+          #   subPath: env-config.js
+          resources:
+            {}
+      # volumes:
+      #   - name: front-env-config
+      #     configMap:
+      #       name: front-env-config
+      #       defaultMode: 0666
+      restartPolicy: Always
+---
+# Source: anfisa/charts/anfisa-back/charts/druid/charts/mongodb/templates/standalone/dep-sts.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: anfisa-mongodb
+  namespace: anfisa-qa
+  labels:
+    app.kubernetes.io/name: mongodb
+    helm.sh/chart: mongodb-10.13.0
+    app.kubernetes.io/instance: anfisa
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: mongodb
+spec:
+  serviceName: anfisa-mongodb
+  updateStrategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: mongodb
+      app.kubernetes.io/instance: anfisa
+      app.kubernetes.io/component: mongodb
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: mongodb
+        helm.sh/chart: mongodb-10.13.0
+        app.kubernetes.io/instance: anfisa
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/component: mongodb
+    spec:
+      
+      serviceAccountName: anfisa-mongodb
+      affinity:
+        podAffinity:
+          
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/name: mongodb
+                    app.kubernetes.io/instance: anfisa
+                    app.kubernetes.io/component: mongodb
+                namespaces:
+                  - "anfisa-qa"
+                topologyKey: kubernetes.io/hostname
+              weight: 1
+        nodeAffinity:
+          
+      securityContext:
+        fsGroup: 1000690000
+        sysctls: []
+      containers:
+        - name: mongodb
+          image: docker.io/bitnami/mongodb:4.4.5-debian-10-r21
+          imagePullPolicy: "IfNotPresent"
+          securityContext:
+            runAsNonRoot: false
+            runAsUser: 1000690000
+          env:
+            - name: BITNAMI_DEBUG
+              value: "false"
+            - name: MONGODB_USERNAME
+              value: "admin"
+            - name: MONGODB_DATABASE
+              value: "temp"
+            - name: ALLOW_EMPTY_PASSWORD
+              value: "yes"
+            - name: MONGODB_SYSTEM_LOG_VERBOSITY
+              value: "0"
+            - name: MONGODB_DISABLE_SYSTEM_LOG
+              value: "no"
+            - name: MONGODB_DISABLE_JAVASCRIPT
+              value: "no"
+            - name: MONGODB_ENABLE_JOURNAL
+              value: "yes"
+            - name: MONGODB_ENABLE_IPV6
+              value: "no"
+            - name: MONGODB_ENABLE_DIRECTORY_PER_DB
+              value: "no"
+          ports:
+            - name: mongodb
+              containerPort: 27017
+          livenessProbe:
+            exec:
+              command:
+                - mongo
+                - --disableImplicitSessions
+                - --eval
+                - "db.adminCommand('ping')"
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 6
+          readinessProbe:
+            exec:
+              command:
+                - bash
+                - -ec
+                - |
+                  mongo --disableImplicitSessions $TLS_OPTIONS --eval 'db.hello().isWritablePrimary || db.hello().secondary' | grep -q 'true'
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 6
+          resources:
+            limits: {}
+            requests: {}
+          volumeMounts:
+            - name: datadir
+              mountPath: /bitnami/mongodb
+              subPath: 
+      volumes:
+  volumeClaimTemplates:
+    - metadata:
+        name: datadir
+      spec:
+        accessModes:
+          - "ReadWriteOnce"
+        resources:
+          requests:
+            storage: "8Gi"
+---
+# Source: anfisa/charts/anfisa-back/charts/druid/charts/mysql/templates/statefulset.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mysql
+  labels:
+    helm.sh/chart: mysql-0.1
+    app-name: mysql
+    component: "database-server"
+    hostNetwork: "false"
+    internal-service: "true"
+    managed-by: chynten
+    created-by: chynten
+    version: "8"
+spec:
+  replicas: 1
+  revisionHistoryLimit: 5
+  selector:
+    matchLabels:
+      app-name: mysql
+  serviceName: mysql
+  template:
+    metadata:
+      labels:
+        app-name: mysql
+    spec:
+      containers:
+        - name: mysql
+          image: "mysql:8.0.26"
+          imagePullPolicy: IfNotPresent
+          args: ["--default-authentication-plugin=mysql_native_password"]
+          resources:
+            {}
+
+          env:
+          - name: MYSQL_ROOT_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: mysql-secret
+                key: mysql-root-password
+          - name: MYSQL_USER
+            value: user
+          - name: MYSQL_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: mysql-secret
+                key: mysql-password
+          - name: MYSQL_DATABASE
+            value: forome
+
+#          volumeMounts:
+#            - name: data
+#              mountPath: /opt
+
+          ports:
+          - name: mysql
+            containerPort: 3306
+      securityContext:
+        {}
+---
+# Source: anfisa/charts/anfisa-back/charts/druid/charts/postgresql/templates/statefulset.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: anfisa-postgresql
+  labels:
+    app.kubernetes.io/name: postgresql
+    helm.sh/chart: postgresql-10.12.7
+    app.kubernetes.io/instance: anfisa
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: primary
+  annotations:
+  namespace: anfisa-qa
+spec:
+  serviceName: anfisa-postgresql-headless
+  replicas: 1
+  updateStrategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: postgresql
+      app.kubernetes.io/instance: anfisa
+      role: primary
+  template:
+    metadata:
+      name: anfisa-postgresql
+      labels:
+        app.kubernetes.io/name: postgresql
+        helm.sh/chart: postgresql-10.12.7
+        app.kubernetes.io/instance: anfisa
+        app.kubernetes.io/managed-by: Helm
+        role: primary
+        app.kubernetes.io/component: primary
+    spec:      
+      affinity:
+        podAffinity:
+          
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/name: postgresql
+                    app.kubernetes.io/instance: anfisa
+                    app.kubernetes.io/component: primary
+                namespaces:
+                  - "anfisa-qa"
+                topologyKey: kubernetes.io/hostname
+              weight: 1
+        nodeAffinity:
+          
+      securityContext:
+        fsGroup: 1000646000
+        runAsUser: 1000670000
+      automountServiceAccountToken: false
+      containers:
+        - name: anfisa-postgresql
+          image: docker.io/bitnami/postgresql:11.13.0-debian-10-r67
+          imagePullPolicy: "IfNotPresent"
+          resources:
+            requests:
+              cpu: 250m
+              memory: 256Mi
+          securityContext:
+            runAsUser: 1000670000
+          env:
+            - name: BITNAMI_DEBUG
+              value: "false"
+            - name: POSTGRESQL_PORT_NUMBER
+              value: "5432"
+            - name: POSTGRESQL_VOLUME_DIR
+              value: "/bitnami/postgresql"
+            - name: PGDATA
+              value: "/bitnami/postgresql/data"
+            - name: POSTGRES_POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgresql-secret
+                  key: postgresql-postgres-password
+            - name: POSTGRES_USER
+              value: "druid"
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgresql-secret
+                  key: postgresql-password
+            - name: POSTGRES_DB
+              value: "druid"
+            - name: POSTGRESQL_ENABLE_LDAP
+              value: "no"
+            - name: POSTGRESQL_ENABLE_TLS
+              value: "no"
+            - name: POSTGRESQL_LOG_HOSTNAME
+              value: "false"
+            - name: POSTGRESQL_LOG_CONNECTIONS
+              value: "false"
+            - name: POSTGRESQL_LOG_DISCONNECTIONS
+              value: "false"
+            - name: POSTGRESQL_PGAUDIT_LOG_CATALOG
+              value: "off"
+            - name: POSTGRESQL_CLIENT_MIN_MESSAGES
+              value: "error"
+            - name: POSTGRESQL_SHARED_PRELOAD_LIBRARIES
+              value: "pgaudit"
+          ports:
+            - name: tcp-postgresql
+              containerPort: 5432
+          livenessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - exec pg_isready -U "druid" -d "dbname=druid" -h 127.0.0.1 -p 5432
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 6
+          readinessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - -e
+                - |
+                  exec pg_isready -U "druid" -d "dbname=druid" -h 127.0.0.1 -p 5432
+                  [ -f /opt/bitnami/postgresql/tmp/.initialized ] || [ -f /bitnami/postgresql/.initialized ]
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 6
+          volumeMounts:
+            - name: data
+              mountPath: /bitnami/postgresql
+              subPath: 
+      volumes:
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - "ReadWriteOnce"
+        resources:
+          requests:
+            storage: "8Gi"
+---
+# Source: anfisa/charts/anfisa-back/charts/druid/charts/zookeeper/templates/statefulset.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: anfisa-zookeeper
+  namespace: anfisa-qa
+  labels:
+    app.kubernetes.io/name: zookeeper
+    helm.sh/chart: zookeeper-6.7.2
+    app.kubernetes.io/instance: anfisa
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: zookeeper
+    role: zookeeper
+spec:
+  serviceName: anfisa-zookeeper-headless
+  replicas: 3
+  podManagementPolicy: Parallel
+  updateStrategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: zookeeper
+      app.kubernetes.io/instance: anfisa
+      app.kubernetes.io/component: zookeeper
+  template:
+    metadata:
+      name: anfisa-zookeeper
+      labels:
+        app.kubernetes.io/name: zookeeper
+        helm.sh/chart: zookeeper-6.7.2
+        app.kubernetes.io/instance: anfisa
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/component: zookeeper
+    spec:
+      
+      serviceAccountName: default
+      securityContext:
+        fsGroup: 1.000646e+09
+      affinity:
+        podAffinity:
+          
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/name: zookeeper
+                    app.kubernetes.io/instance: anfisa
+                    app.kubernetes.io/component: zookeeper
+                namespaces:
+                  - "anfisa-qa"
+                topologyKey: kubernetes.io/hostname
+              weight: 1
+        nodeAffinity:
+          
+      containers:
+        - name: zookeeper
+          image: docker.io/bitnami/zookeeper:3.7.0-debian-10-r27
+          imagePullPolicy: "IfNotPresent"
+          securityContext:
+            runAsUser: 1.00067e+09
+          command:
+            - bash
+            - -ec
+            - |
+                # Execute entrypoint as usual after obtaining ZOO_SERVER_ID
+                # check ZOO_SERVER_ID in persistent volume via myid
+                # if not present, set based on POD hostname
+                if [[ -f "/bitnami/zookeeper/data/myid" ]]; then
+                  export ZOO_SERVER_ID="$(cat /bitnami/zookeeper/data/myid)"
+                else
+                  HOSTNAME=`hostname -s`
+                  if [[ $HOSTNAME =~ (.*)-([0-9]+)$ ]]; then
+                    ORD=${BASH_REMATCH[2]}
+                    export ZOO_SERVER_ID=$((ORD + 1 ))
+                  else
+                    echo "Failed to get index from hostname $HOST"
+                    exit 1
+                  fi
+                fi
+                exec /entrypoint.sh /run.sh
+          resources:
+            requests:
+              cpu: 250m
+              memory: 256Mi
+          env:
+            - name: ZOO_DATA_LOG_DIR
+              value: ""
+            - name: ZOO_PORT_NUMBER
+              value: "2181"
+            - name: ZOO_TICK_TIME
+              value: "2000"
+            - name: ZOO_INIT_LIMIT
+              value: "10"
+            - name: ZOO_SYNC_LIMIT
+              value: "5"
+            - name: ZOO_MAX_CLIENT_CNXNS
+              value: "60"
+            - name: ZOO_4LW_COMMANDS_WHITELIST
+              value: "srvr, mntr, ruok"
+            - name: ZOO_LISTEN_ALLIPS_ENABLED
+              value: "no"
+            - name: ZOO_AUTOPURGE_INTERVAL
+              value: "0"
+            - name: ZOO_AUTOPURGE_RETAIN_COUNT
+              value: "3"
+            - name: ZOO_MAX_SESSION_TIMEOUT
+              value: "40000"
+            - name: ZOO_SERVERS
+              value: anfisa-zookeeper-0.anfisa-zookeeper-headless.anfisa-qa.svc.cluster.local:2888:3888::1 anfisa-zookeeper-1.anfisa-zookeeper-headless.anfisa-qa.svc.cluster.local:2888:3888::2 anfisa-zookeeper-2.anfisa-zookeeper-headless.anfisa-qa.svc.cluster.local:2888:3888::3 
+            - name: ZOO_ENABLE_AUTH
+              value: "no"
+            - name: ZOO_HEAP_SIZE
+              value: "1024"
+            - name: ZOO_LOG_LEVEL
+              value: "ERROR"
+            - name: ALLOW_ANONYMOUS_LOGIN
+              value: "yes"
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.name
+          ports:
+            
+            - name: client
+              containerPort: 2181
+            
+            
+            - name: follower
+              containerPort: 2888
+            - name: election
+              containerPort: 3888
+          livenessProbe:
+            exec:
+              command: ['/bin/bash', '-c', 'echo "ruok" | timeout 2 nc -w 2 localhost 2181 | grep imok']
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 6
+          readinessProbe:
+            exec:
+              command: ['/bin/bash', '-c', 'echo "ruok" | timeout 2 nc -w 2 localhost 2181 | grep imok']
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 6
+          volumeMounts:
+            - name: data
+              mountPath: /bitnami/zookeeper
+      volumes:
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+        annotations:
+      spec:
+        accessModes:
+          - "ReadWriteOnce"
+        resources:
+          requests:
+            storage: "8Gi"
+---
+# Source: anfisa/charts/anfisa-back/charts/druid/templates/historical/statefulset.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app: druid
+    chart: druid-0.3.12
+    component: historical
+    heritage: Helm
+    release: anfisa
+  name: anfisa-druid-historical
+spec:
+  serviceName: anfisa-druid-historical
+  replicas: 2
+  selector:
+    matchLabels:
+      app: druid
+      release: anfisa
+      component: historical
+  template:
+    metadata:
+      labels:
+        app: druid
+        component: historical
+        release: anfisa
+    spec:
+      volumes:
+      - name: druid-data
+        persistentVolumeClaim:
+          claimName: forome-anfisa-s3-pvc
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 1
+            podAffinityTerm:
+              topologyKey: kubernetes.io/hostname
+              labelSelector:
+                matchLabels:
+                  app: "druid"
+                  release: "anfisa"
+                  component: "historical"
+      containers:
+      - name: anfisa-druid-historical
+        args: [ "historical" ]
+        env:
+        - name: druid_zk_service_host
+          value: anfisa-zookeeper-headless:2181
+        - name: druid_extensions_loadList
+          value: "[\"druid-histogram\",\"druid-datasketches\",\"druid-lookups-cached-global\",\"postgresql-metadata-storage\",\"druid-kafka-indexing-service\",\"druid-parquet-extensions\",\"druid-kinesis-indexing-service\"]"
+        - name: JAVA_OPTS
+          value: 
+        - name: DRUID_MAXDIRECTMEMORYSIZE
+          value: "6g"
+        - name: DRUID_MAXNEWSIZE
+          value: "250m"
+        - name: DRUID_NEWSIZE
+          value: "250m"
+        - name: DRUID_XMS
+          value: "1g"
+        - name: DRUID_XMX
+          value: "1g"
+        - name: druid_coordinator_balancer_strategy
+          value: "cachingCost"
+        - name: druid_indexer_fork_property_druid_processing_buffer_sizeBytes
+          value: "10000000"
+        - name: druid_indexer_fork_property_druid_processing_numMergeBuffers
+          value: "2"
+        - name: druid_indexer_fork_property_druid_processing_numThreads
+          value: "1"
+        - name: druid_indexer_logs_directory
+          value: "/data/anfisa/var/druid/indexing-logs"
+        - name: druid_indexer_logs_type
+          value: "file"
+        - name: druid_indexer_queue_startDelay
+          value: "PT30S"
+        - name: druid_indexer_runner_javaOptsArray
+          value: "[\"-server\", \"-Xmx1g\", \"-Xms1g\", \"-XX:MaxDirectMemorySize=3g\", \"-Duser.timezone=UTC\", \"-Dfile.encoding=UTF-8\", \"-Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager\"]"
+        - name: druid_processing_buffer_sizeBytes
+          value: "10000000"
+        - name: druid_processing_numMergeBuffers
+          value: "4"
+        - name: druid_processing_numThreads
+          value: "16"
+        - name: druid_server_maxSize
+          value: "8000000000"
+        - name: druid_storage_disableAcl
+          value: "true"
+        - name: druid_storage_storageDirectory
+          value: "/data/anfisa/var/druid/segments"
+        - name: druid_storage_type
+          value: "local"
+        - name: druid_worker_capacity
+          value: "4"
+        resources:
+            {}
+        livenessProbe:
+          initialDelaySeconds: 120
+          timeoutSeconds: 10
+          httpGet:
+            path: /status/health
+            port: 8083
+        readinessProbe:
+          initialDelaySeconds: 120
+          timeoutSeconds: 10
+          httpGet:
+            path: /status/selfDiscovered
+            port: 8083
+        image: "apache/druid:0.20.1"
+        imagePullPolicy: "IfNotPresent"
+        ports:
+        - containerPort: 8083
+          name: http
+        volumeMounts:
+        - mountPath: /opt/druid/var
+          name: data
+        - name: druid-data
+          mountPath: /data/anfisa
+      securityContext:
+        fsGroup: 0
+        runAsUser: 0
+        runAsGroup: 0
+  updateStrategy:
+    type: RollingUpdate
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes:
+        - "ReadWriteOnce"
+      resources:
+        requests:
+          storage: "4Gi"
+---
+# Source: anfisa/charts/anfisa-back/charts/druid/templates/middleManager/statefulset.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app: druid
+    chart: druid-0.3.12
+    component: middle-manager
+    heritage: Helm
+    release: anfisa
+  name: anfisa-druid-middle-manager
+spec:
+  serviceName: anfisa-druid-middle-manager
+  replicas: 3
+  selector:
+    matchLabels:
+      app: druid
+      release: anfisa
+      component: middle-manager
+  template:
+    metadata:
+      labels:
+        app: druid
+        component: middle-manager
+        release: anfisa
+    spec:
+      volumes:
+      - name: druid-data
+        persistentVolumeClaim:
+          claimName: forome-anfisa-s3-pvc
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 1
+            podAffinityTerm:
+              topologyKey: kubernetes.io/hostname
+              labelSelector:
+                matchLabels:
+                  app: "druid"
+                  release: "anfisa"
+                  component: "middle-manager"
+      containers:
+      - name: anfisa-druid-middle-manager
+        args: [ "middleManager" ]
+        env:
+        - name: druid_zk_service_host
+          value: anfisa-zookeeper-headless:2181
+        - name: druid_extensions_loadList
+          value: "[\"druid-histogram\",\"druid-datasketches\",\"druid-lookups-cached-global\",\"postgresql-metadata-storage\",\"druid-kafka-indexing-service\",\"druid-parquet-extensions\",\"druid-kinesis-indexing-service\"]"
+        - name: JAVA_OPTS
+          value: 
+        - name: druid_coordinator_balancer_strategy
+          value: "cachingCost"
+        - name: druid_indexer_fork_property_druid_processing_buffer_sizeBytes
+          value: "10000000"
+        - name: druid_indexer_fork_property_druid_processing_numMergeBuffers
+          value: "2"
+        - name: druid_indexer_fork_property_druid_processing_numThreads
+          value: "1"
+        - name: druid_indexer_logs_directory
+          value: "/data/anfisa/var/druid/indexing-logs"
+        - name: druid_indexer_logs_type
+          value: "file"
+        - name: druid_indexer_queue_startDelay
+          value: "PT30S"
+        - name: druid_indexer_runner_javaOptsArray
+          value: "[\"-server\", \"-Xmx1g\", \"-Xms1g\", \"-XX:MaxDirectMemorySize=3g\", \"-Duser.timezone=UTC\", \"-Dfile.encoding=UTF-8\", \"-Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager\"]"
+        - name: druid_processing_buffer_sizeBytes
+          value: "10000000"
+        - name: druid_processing_numMergeBuffers
+          value: "4"
+        - name: druid_processing_numThreads
+          value: "16"
+        - name: druid_server_maxSize
+          value: "8000000000"
+        - name: druid_storage_disableAcl
+          value: "true"
+        - name: druid_storage_storageDirectory
+          value: "/data/anfisa/var/druid/segments"
+        - name: druid_storage_type
+          value: "local"
+        - name: druid_worker_capacity
+          value: "4"
+        resources:
+            {}
+        livenessProbe:
+          initialDelaySeconds: 60
+          httpGet:
+            path: /status/health
+            port: 8091
+        readinessProbe:
+          initialDelaySeconds: 60
+          httpGet:
+            path: /status/selfDiscovered
+            port: 8091
+        image: "apache/druid:0.20.1"
+        imagePullPolicy: "IfNotPresent"
+        ports:
+        - containerPort: 8091
+          name: http
+        volumeMounts:
+        - name: data
+          mountPath: /opt/druid/var
+        - name: druid-data
+          mountPath: /data/anfisa
+      securityContext:
+          fsGroup: 0
+          runAsUser: 0
+          runAsGroup: 0
+
+  updateStrategy:
+    type: RollingUpdate
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes:
+        - "ReadWriteOnce"
+      resources:
+        requests:
+          storage: "4Gi"
+---
+# Source: anfisa/charts/anfisa-back/charts/druid/templates/router/route.yaml
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: router
+  labels:
+    app: druid
+    component: router
+spec:
+  to:
+    kind: Service
+    name: router
+    weight: 100
+  port:
+    targetPort: router
+  wildcardPolicy: None
+---
+# Source: anfisa/charts/anfisa-back/charts/druid/templates/servicemonitor.yaml
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: anfisa-druid-monitor
+  labels:
+    app: druid
+    chart: druid-0.3.12
+    release: anfisa
+    heritage: Helm
+    tier: bi
+spec:
+  selector:
+    matchLabels:
+      monitoring: enabled
+  endpoints:
+  - port: metrics
+    interval: 30s
+---
+# Source: anfisa/charts/anfisa-front/templates/tests/test-connection.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "anfisa-anfisa-front-test-connection"
+  labels:
+    helm.sh/chart: anfisa-front-0.8.48
+    app.kubernetes.io/name: anfisa-front
+    app.kubernetes.io/instance: anfisa
+    app.kubernetes.io/version: "0.8.48"
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args: ['anfisa-anfisa-front:80']
+  restartPolicy: Never

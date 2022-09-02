@@ -1,0 +1,15 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: igv-dir
+  namespace: {{ .Release.Namespace }}
+data:
+  igv.dir: |
+    [
+        {"dataset": "xl_PGP3140_wgs_NIST-4_2",
+            "url": "https://forome-bam.s3.us-south.cloud-object-storage.appdomain.cloud/GRCh38/{name}.sorted.bam"},
+        {"dataset": "PGP3140_wgs_panel_hl",
+            "url": "https://forome-bam.s3.us-south.cloud-object-storage.appdomain.cloud/GRCh38/{name}.sorted.bam"},
+        {"dataset": "xl_PGP3140_wgs_panel_hl",
+            "url": "https://forome-bam.s3.us-south.cloud-object-storage.appdomain.cloud/GRCh38/{name}.sorted.bam"}
+    ]

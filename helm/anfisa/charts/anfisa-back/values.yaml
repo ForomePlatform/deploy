@@ -1,0 +1,64 @@
+name: anfisa-back
+
+image:
+  repository: forome.azurecr.io/anfisa
+  tag: "v.0.7.8"
+  pullPolicy: IfNotPresent
+
+imagePullSecrets:
+  - name: anfisa-registry
+
+imageCredentials: {}
+
+service:
+  type: ClusterIP
+  port: 80
+
+env:
+  - name: ANFISA_COORD_HOST
+    value: anfisa-druid-coordinator
+  - name: ANFISA_ROUTER_HOST
+    value: router
+  - name: ANFISA_MONGO_HOST
+    value: anfisa-mongodb
+  - name: UWSGI_BACKEND
+    value: 127.0.0.1:3041
+  - name: ANFISA_WORK
+    value: "/anfisa/a-setup"
+  - name: ANFISA_SRC
+    value: "/anfisa"
+  - name: ANFISA_HTML_APP_BASE
+    value: "/app"
+  - name: ANFISA_HTML_TITLE
+    value: "Anfisa"
+  - name: ANFISA_IGVDIR
+    value: "/anfisa/igv.dir"
+  - name: ANFISA_DRUIDVAULTPREFIX
+    value: "demo_v7"
+  - name: ANFISA_DRUIDINDEX
+    value: "http://anfisa-druid-coordinator:8081/druid/indexer/v1/task"
+  - name: ANFISA_DRUIDCOORD
+    value: "http://anfisa-druid-coordinator:8081/druid/coordinator/v1"
+  - name: ANFISA_DRUIDSQL
+    value: "http://router:80/druid/v2/sql"
+  - name: ANFISA_DRUIDQUERY
+    value: "http://router:80/druid/v2"
+  - name: ANFISA_DRUIDCOPYDIR
+    value: "/data/anfisa"
+  - name: ANFISA_MONGOHOST
+    value: "anfisa-mongodb"
+  - name: ANFISA_MONGODB
+    value: "Anfisa1"
+  - name: ANFISA_MONGOPORT
+    value: 27017
+
+persistent:
+  foromeAnfisaS3:
+    size: 100Gi
+    storageClassName:
+  anfisaWorkdir:
+    size: 100Gi
+    storageClassName:
+  foromeDatasets:
+    size: 100Gi
+    storageClassName:
