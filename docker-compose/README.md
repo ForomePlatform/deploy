@@ -1,25 +1,104 @@
 # Deploy via Docker-compose
 
+- [Deploy via Docker-compose](#deploy-via-docker-compose)
+  - [Prerequisites](#prerequisites)
+  - [Prepare env](#prepare-env)
+    - [Volumes mount for anfisa](#volumes-mount-for-anfisa)
+    - [Versions changes](#versions-changes)
+    - [Revers proxy](#revers-proxy)
+      - [Classic (dedicated domain)](#classic-dedicated-domain)
+  - [Start anfisa](#start-anfisa)
+  - [Insert demodata](#insert-demodata)
+
+## Prerequisites
+
+**Attention: Docker installation also installs Druid. Druid is required for
+handling whole exome/genome datasets, but it takes a lot of memory. 
+Minimum required memory is 8G and swap should be enabled.** 
+
+**If you have 4G of memory, first adjust Druid parameters in environment.template file.**
+
+**If you have less than 4G, you can install demo version without Druid. 
+Update docker-compose.yml.template**
+
+Ensure that the following packages are installed on your system:
+
+  * curl
+  * zip
+  * unzip
+  * Docker v20 or higher
+  * Docker Compose v2.2.0 or higher
+
+Click on the below appropriate tab to install the required packages on Ubuntu or Mac OS.
+
+**<details><summary>Install prerequisites on Ubuntu</summary>**
+<p>
+
+Run the following command to install zip, unzip and curl packages:
+
+       sudo apt update 
+       sudo apt install zip unzip curl
+
+Follow the link to install the latest version of Docker and Docker Compose 
+on [Ubuntu](https://docs.docker.com/engine/install/ubuntu/). 
+If you run script as non-root user, ensure that Docker has required rights 
+according to the [Post-installation steps for Linux](https://docs.docker.com/engine/install/linux-postinstall/).
+
+Ensure that Docker version is 19.03.0 or higher and Docker Compose version is 2.0.0 or higher.
+
+       docker -v
+       docker compose version
+
+</p>
+</details>
+
+**<details><summary>Install prerequisites on Mac OS</summary>**
+<p>
+
+Install [Homebrew Package Manager](https://brew.sh/), command can be used:
+	
+       /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+Run the following command to install required packages:
+	
+       xcode-select --install
+       brew update
+       brew install curl
+       brew install zip
+       brew install unzip
+
+Follow the link to install the latest version of Docker and Docker Compose on [Mac OS](https://docs.docker.com/desktop/mac/install/).
+
+Ensure that Docker version is 19.03.0 or higher and Docker Compose version is 2.0.0 or higher.
+
+       docker -v
+       docker compose version
+
+</p>
+</details>
+
 ## Prepare env
 
-You need copy `.env-example` to `.env` and configurate if you needed
+You need copy `example.env` to `.env` and configurate if you needed
 
-### Hostpath mount for anfisa
+`.env` - Anfisa configs  
+`druid.env` - Druid configs  
+`mongo.env` - Mongo configs  
 
-Path on host wich using for store data
+### Volumes mount for anfisa
 
-```env
-ASETUP_WORKDIR="./a-setup"
-DRUID_WORKDIR="./druid"
+If you need configurate volumes for docker-compose using this [guid](https://docs.docker.com/compose/compose-file/compose-file-v3/#volume-configuration-reference)
+
+Example with hostpath in `docker-compose.yml`
+```yaml
+volumes:
+  anfisa-asetup:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /path/to/my/host
 ```
-> Before using hostpath you need create that paths 
-> ```sh
-> ASETUP_WORKDIR=./a-setip
-> mkdir -p $ASETUP_WORKDIR
-> DRUID_WORKDIR="./druid"
-> mkdir -p $DRUID_WORKDIR
-> ```
-
 
 ### Versions changes
 
@@ -37,13 +116,8 @@ ZOOKEEPER_VERSION=3.5
 
 ### Revers proxy
 
-Frontend using static with preconfigured `REACT_APP_URL_BACKEND` so if you want using anfisa behind your revers proxy you need change this env.
-
+#### Classic (dedicated domain)
 For ex (nginx):
-
-```sh
-REACT_APP_URL_BACKEND="http://dnsname.for.reversproxy.com/app"
-```
 
 ```nginx
 server {
@@ -56,11 +130,6 @@ server {
     }
 }
 ```
-
-Then anfisa-frontend start opening on `http://dnsname.for.reversproxy.com` and anfisa-backend `http://dnsname.for.reversproxy.com/app`
-
->if you using `https` you must using `https` in `REACT_APP_URL_BACKEND` ex `REACT_APP_URL_BACKEND="https://dnsname.for.reversproxy.com/app"`
-
 ## Start anfisa
 
 ```sh

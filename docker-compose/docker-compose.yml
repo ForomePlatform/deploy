@@ -19,7 +19,7 @@ services:
     <<: *common_parameters
     image: forome.azurecr.io/anfisa-react-client:${ANFISA_FRONTEND_VERSION}
     ports:
-      - "3000:8080"
+      - "${ANFISA_FRONT_PORT}:8080"
     env_file:
       - .env
     restart: always
@@ -28,14 +28,11 @@ services:
     container_name: anfisa-backend
     <<: *common_parameters
     image: forome.azurecr.io/anfisa:${ANFISA_BACKEND_VERSION}
-    user: root
     volumes:
       - anfisa-asetup:/anfisa/a-setup
     build:
       context: .
       dockerfile: setup/Dockerfile
-    ports:
-      - "9010:80"
     env_file:
       - .env
     restart: always
@@ -44,12 +41,6 @@ services:
     container_name: anfisa-zookeeper
     <<: *common_parameters
     image: zookeeper:${ZOOKEEPER_VERSION}
-    user: root
-    ports:
-      - "2181:2181"
-      - "2888:2888"
-      - "3888:3888"
-      - "8080:8080"
     environment:
       - ZOO_MY_ID=1
       - ZK_SERVER_HEAP=128
@@ -59,35 +50,29 @@ services:
     container_name: anfisa-coordinator
     <<: *common_parameters
     image: apache/druid:${DRUID_VERSION}
-    user: root
     volumes:
       - druid-data:/opt/data/
       - druid-coordinator:/opt/druid/var
     depends_on:
       - zookeeper
-    ports:
-      - "8081:8081"
     command:
       - coordinator
     environment:
       - DRUID_XMS=256m
       - DRUID_XMX=2g
     env_file:
-      - .env
+      - druid.env
     restart: always
 
   broker:
     container_name: anfisa-broker
     <<: *common_parameters
     image: apache/druid:${DRUID_VERSION}
-    user: root
     volumes:
       - druid-broker:/opt/druid/var
     depends_on:
       - zookeeper
       - coordinator
-    ports:
-      - "8082:8082"
     command:
       - broker
     environment:
@@ -96,7 +81,7 @@ services:
       - druid_processing_numMergeBuffers=2
       - druid_processing_numThreads=1
     env_file:
-      - .env
+      - druid.env
     restart: always
 
   historical:
@@ -109,9 +94,6 @@ services:
     depends_on:
       - zookeeper
       - coordinator
-    user: root
-    ports:
-      - "8083:8083"
     command:
       - historical
     environment:
@@ -120,14 +102,13 @@ services:
       - druid_processing_numMergeBuffers=2
       - druid_processing_numThreads=2
     env_file:
-      - .env
+      - druid.env
     restart: always
 
   middlemanager:
     container_name: anfisa-middlemanager
     <<: *common_parameters
     image: apache/druid:${DRUID_VERSION}
-    user: root
     volumes:
       - druid-data:/opt/data/
       - druid-middlemanager:/opt/druid/var
@@ -136,8 +117,6 @@ services:
     depends_on:
       - zookeeper
       - coordinator
-    ports:
-      - "8091:8091"
     command:
       - middleManager
     environment:
@@ -146,86 +125,41 @@ services:
       - druid_indexer_fork_property_druid_processing_buffer_sizeBytes=100000000
       - druid_indexer_fork_property_druid_processing_numThreads=1
     env_file:
-      - .env
+      - druid.env
     restart: always
 
   router:
     container_name: anfisa-router
     <<: *common_parameters
     image: apache/druid:${DRUID_VERSION}
-    user: root
     volumes:
       - druid-router:/opt/druid/var
     depends_on:
       - zookeeper
       - coordinator
-    ports:
-      - "8888:8888"
     command:
       - router
     environment:
       - DRUID_XMS=128m
       - DRUID_XMX=256m
     env_file:
-      - .env
+      - druid.env
     restart: always
 
   mongo:
     container_name: anfisa-mongo
     <<: *common_parameters
     image: mongo:${MONGO_VERSION}
-    ports:
-      - "27017:27017"
     env_file:
-      - .env
+      - mongo.env
     restart: always
 
 volumes:
   anfisa-asetup:
-    # driver: local
-    # driver_opts:
-    #   type: none
-    #   o: bind
-    #   device: ${ASETUP_WORKDIR}
   anfisa-data:
-    # driver: local
-    # driver_opts:
-    #   type: none
-    #   o: bind
-    #   device: ${ASETUP_WORKDIR}/data
   druid-broker:
-    # driver: local
-    # driver_opts:
-    #   type: none
-    #   o: bind
-    #   device: ${DRUID_WORKDIR}/broker
   druid-middlemanager:
-    # driver: local
-    # driver_opts:
-    #   type: none
-    #   o: bind
-    #   device: ${DRUID_WORKDIR}/middlemanager
   druid-coordinator:
-    # driver: local
-    # driver_opts:
-    #   type: none
-    #   o: bind
-    #   device: ${DRUID_WORKDIR}/coordinator
   druid-router:
-    # driver: local
-    # driver_opts:
-    #   type: none
-    #   o: bind
-    #   device: ${DRUID_WORKDIR}/data
   druid-historical:
-    # driver: local
-    # driver_opts:
-    #   type: none
-    #   o: bind
-    #   device: ${DRUID_WORKDIR}/historical
   druid-data:
-    # driver: local
-    # driver_opts:
-    #   type: none
-    #   o: bind
-    #   device: ${DRUID_WORKDIR}/data

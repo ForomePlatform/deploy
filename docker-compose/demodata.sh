@@ -11,6 +11,9 @@
     unzip gene_db.zip
   fi
 
+  docker cp gene_db.js anfisa-backend:/anfisa/a-setup/data/gene_db.js
+  docker exec -it  anfisa-backend sh -c 'mkdir -p /anfisa/a-setup/data/examples/'
+  docker cp pgp3140_wgs_hlpanel anfisa-backend:/anfisa/a-setup/data/examples/pgp3140_wgs_hlpanel
   docker exec -it anfisa-backend sh -c 'echo "Initializing ..."; while ! test -f "/anfisa/anfisa.json"; do sleep 5; done'
   docker exec -it anfisa-backend sh -c 'PYTHONPATH=/anfisa/anfisa/ python3 -m app.adm_mongo -c /anfisa/anfisa.json -m GeneDb /anfisa/a-setup/data/gene_db.js'
   docker exec -it anfisa-backend sh -c 'PYTHONPATH=/anfisa/anfisa/ python3 -u -m app.storage -c /anfisa/anfisa.json -m create --reportlines 200 -f -k ws -i /anfisa/a-setup/data/examples/pgp3140_wgs_hlpanel/pgp3140_wgs_hlpanel.cfg PGP3140_HL_GENES'
