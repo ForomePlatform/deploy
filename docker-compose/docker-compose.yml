@@ -62,7 +62,7 @@ services:
       - DRUID_XMX=2g
     env_file:
       - druid.env
-    restart: always
+    # restart: always
 
   broker:
     container_name: anfisa-broker
@@ -139,6 +139,8 @@ services:
       - coordinator
     command:
       - router
+    ports:
+      - "8888:8888"
     environment:
       - DRUID_XMS=128m
       - DRUID_XMX=256m

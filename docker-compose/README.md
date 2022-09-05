@@ -3,9 +3,10 @@
 - [Deploy via Docker-compose](#deploy-via-docker-compose)
   - [Prerequisites](#prerequisites)
   - [Prepare env](#prepare-env)
+    - [Configs overview](#configs-overview)
     - [Volumes mount for anfisa](#volumes-mount-for-anfisa)
     - [Versions changes](#versions-changes)
-    - [Revers proxy](#revers-proxy)
+    - [Reverse proxy](#reverse-proxy)
       - [Classic (dedicated domain)](#classic-dedicated-domain)
   - [Start anfisa](#start-anfisa)
   - [Insert demodata](#insert-demodata)
@@ -79,7 +80,17 @@ Ensure that Docker version is 19.03.0 or higher and Docker Compose version is 2.
 
 ## Prepare env
 
-You need copy `example.env` to `.env` and configurate if you needed
+
+Firstly you need clone this repository
+
+```sh
+git clone https://github.com/ForomePlatform/deploy.git
+## And change directory to `docker-compose`
+cd deploy/docker-compose
+```
+
+After that copy `example.env` to `.env` and configure if you needed
+### Configs overview
 
 `.env` - Anfisa configs  
 `druid.env` - Druid configs  
@@ -87,9 +98,9 @@ You need copy `example.env` to `.env` and configurate if you needed
 
 ### Volumes mount for anfisa
 
-If you need configurate volumes for docker-compose using this [guid](https://docs.docker.com/compose/compose-file/compose-file-v3/#volume-configuration-reference)
+If you need configuration volumes for docker-compose using this [guid](https://docs.docker.com/compose/compose-file/compose-file-v3/#volume-configuration-reference)
 
-Example with hostpath in `docker-compose.yml`
+Example with host path in `docker-compose.yml`
 ```yaml
 volumes:
   anfisa-asetup:
@@ -102,7 +113,7 @@ volumes:
 
 ### Versions changes
 
-If you want update backend/frontend and etc you can set versions in `.env` file.
+If you want to update backend/frontend and etc you can set versions in `.env` file.
 Recomendate versions set in `.env-example`
 
 ```env
@@ -114,10 +125,11 @@ MONGO_VERSION=6.0.1
 ZOOKEEPER_VERSION=3.5
 ```
 
-### Revers proxy
+### Reverse proxy
 
 #### Classic (dedicated domain)
-For ex (nginx):
+
+For ex. `nginx`:
 
 ```nginx
 server {
@@ -126,7 +138,8 @@ server {
     client_max_body_size 100M;
 
     location / {
-        proxy_pass http://localhost:3000;
+       ## ANFISA_FRONT_PORT
+       proxy_pass http://localhost:3000; 
     }
 }
 ```
