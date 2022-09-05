@@ -10,6 +10,10 @@
       - [Classic (dedicated domain)](#classic-dedicated-domain)
   - [Start anfisa](#start-anfisa)
   - [Insert demodata](#insert-demodata)
+    - [Known issues](#known-issues)
+      - [Demodata insert](#demodata-insert)
+        - [Connection refused](#connection-refused)
+      - [Druid cant using `druid-data`](#druid-cant-using-druid-data)
 
 ## Prerequisites
 
@@ -155,3 +159,20 @@ docker-compose up -d
 ```sh
 ./demodata.sh
 ```
+
+
+### Known issues
+
+#### Demodata insert
+
+
+##### Connection refused
+
+*Summary*: Druid uses arround `8-10Gib` for start and sometimes you can getting `OOM` killed for `druid` componnets.  
+*How to Reproduce*: Just have not enought `RAM` for `druid`  
+*How to fix*: Give more `ram`))  
+
+#### Druid cant using `druid-data`
+*Summary*: `Docker compose` create volume with `root:root` uid:gid and druid cant create files on them.
+*How to Reproduce*: Just remove `user: root` from `docker-compose.yml`
+*How to fix*: `user: root`
