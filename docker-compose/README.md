@@ -10,10 +10,16 @@
       - [Classic (dedicated domain)](#classic-dedicated-domain)
   - [Start anfisa](#start-anfisa)
   - [Insert demodata](#insert-demodata)
+    - [Small dataset ~5mins insert](#small-dataset-5mins-insert)
+    - [Big dataset ~4-5hrs insert](#big-dataset-4-5hrs-insert)
+      - [Foreground Isert](#foreground-isert)
+      - [Background Isert](#background-isert)
     - [Known issues](#known-issues)
       - [Demodata insert](#demodata-insert)
         - [Connection refused](#connection-refused)
       - [Druid cant using `druid-data`](#druid-cant-using-druid-data)
+      - [Revers proxy](#revers-proxy)
+        - [Behind subpath](#behind-subpath)
 
 ## Prerequisites
 
@@ -156,18 +162,51 @@ docker-compose up -d
 
 ## Insert demodata
 
+### Small dataset ~5mins insert
 ```sh
 ./demodata.sh
 ```
 
+### Big dataset ~4-5hrs insert
+
+#### Foreground Isert
+
+> You will need approximately 25G of space available to 
+> experiment with a whole genome 
+
+* First, download 
+  [prepared dataset](https://forome-dataset-public.s3.us-south.cloud-object-storage.appdomain.cloud/pgp3140_wgs_nist-v4.2.tar.gz)
+* Unpack the content into some directory (e.g. directory `data` 
+  under your work directory)
+* Run Anfisa ingestion process
+                                     
+Here are sample commands that can be executed:
+
+```sh
+    curl -fsSLO https://forome-dataset-public.s3.us-south.cloud-object-storage.appdomain.cloud/pgp3140_wgs_nist-v4.2.tar.gz
+
+    docker cp pgp3140_wgs_nist-v4.2.tar.gz anfisa-backend:/anfisa/a-setup/data/examples/
+    docker exec -it anfisa-backend sh -c 'cd /anfisa/a-setup/data/examples && tar -zxvf pgp3140_wgs_nist-v4.2.tar.gz'
+    docker exec -it anfisa-backend sh -c 'PYTHONPATH=/anfisa/anfisa/ python3 -u -m app.storage -c /anfisa/anfisa.json -m create --reportlines 1000 -f -k xl -i /anfisa/a-setup/data/examples/pgp3140_wgs_nist-v4.2/pgp3140_wgs_nist-v4.2.cfg XL_PGP3140_NIST_V42'
+```
+
+#### Background Isert
+But mb you want start insert and going away. For that you can using `nohoup` and start insert script in BackGround
+
+```sh
+    nohup docker exec -it anfisa-backend sh -c 'PYTHONPATH=/anfisa/anfisa/ python3 -u -m app.storage -c /anfisa/anfisa.json -m create --reportlines 1000 -f -k xl -i /anfisa/a-setup/data/examples/pgp3140_wgs_nist-v4.2/pgp3140_wgs_nist-v4.2.cfg XL_PGP3140_NIST_V42' > insert.logs &
+```
+
+Check the progress
+
+```sh
+tail insert.logs
+```
 
 ### Known issues
 
 #### Demodata insert
-
-
 ##### Connection refused
-
 *Summary*: Druid uses arround `8-10Gib` for start and sometimes you can getting `OOM` killed for `druid` componnets.  
 *How to Reproduce*: Just have not enought `RAM` for `druid`  
 *How to fix*: Give more `ram`))  
@@ -176,3 +215,7 @@ docker-compose up -d
 *Summary*: `Docker compose` create volume with `root:root` uid:gid and druid cant create files on them.
 *How to Reproduce*: Just remove `user: root` from `docker-compose.yml`
 *How to fix*: `user: root`
+
+#### Revers proxy
+##### Behind subpath
+Unfortunalty right now our app cant work on `subpath` behind revers proxy but that WIP
