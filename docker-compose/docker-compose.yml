@@ -34,9 +34,6 @@ services:
       - anfisa-asetup:/anfisa/a-setup
       # - ./configs/anfisa.json:/anfisa/anfisa.json
       # - ./configs/igv.dir:/anfisa/igv.dir
-    build:
-      context: .
-      dockerfile: setup/Dockerfile
     env_file:
       - .env
     restart: always
