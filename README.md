@@ -7,12 +7,14 @@ Repository for deploy `anfisa`
 
 ### Docker-compose
 
+For deploy anfisa via docker-compose you can use this docs
+
 [Readme.md](docker-compose/README.md)
 
-### Helm
+### Helm (TBD)
 
 [Readme.md](helm/README.md)
 
-### Local
+### Local (TBD)
 
 [Readme.md](local/README.md)
