@@ -5,7 +5,7 @@
   - [Prepare env](#prepare-env)
     - [Configs overview](#configs-overview)
     - [Volumes mount for anfisa](#volumes-mount-for-anfisa)
-    - [Versions changes](#versions-changes)
+    - [Update](#update)
     - [Reverse proxy](#reverse-proxy)
       - [Classic (dedicated domain)](#classic-dedicated-domain)
   - [Start anfisa](#start-anfisa)
@@ -122,7 +122,7 @@ volumes:
       device: /path/to/my/host
 ```
 
-### Versions changes
+### Update
 
 If you want to update backend/frontend and etc you can set versions in `.env` file.
 Recomendate versions set in `.env-example`
