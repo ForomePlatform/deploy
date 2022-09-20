@@ -9,6 +9,7 @@
     - [Reverse proxy](#reverse-proxy)
       - [Classic (dedicated domain)](#classic-dedicated-domain)
   - [Start anfisa](#start-anfisa)
+  - [Custom configuration](#custom-configuration)
   - [Insert demodata](#insert-demodata)
     - [Small dataset ~5mins insert](#small-dataset-5mins-insert)
     - [Big dataset ~4-5hrs insert](#big-dataset-4-5hrs-insert)
@@ -108,7 +109,7 @@ After that copy `example.env` to `.env` and configure if you needed
 
 ### Volumes mount for anfisa
 
-If you need configuration volumes for docker-compose using this [guid](https://docs.docker.com/compose/compose-file/compose-file-v3/#volume-configuration-reference)
+If you need configuration volumes for docker-compose using this [guide](https://docs.docker.com/compose/compose-file/compose-file-v3/#volume-configuration-reference)
 
 Example with host path in `docker-compose.yml`
 ```yaml
@@ -149,7 +150,7 @@ server {
 
     location / {
        ## ANFISA_FRONT_PORT
-       proxy_pass http://localhost:3000; 
+       proxy_pass http://localhost:9994; 
     }
 }
 ```
@@ -160,6 +161,23 @@ docker-compose pull
 docker-compose up -d
 ```
 
+## Custom configuration
+
+If you want create custom configuration for `anfisa.json` or `igv.dir` you can uncomment lines in `docker-compose.yml` 
+
+```yaml
+  anfisa-backend:
+    user: root
+    container_name: anfisa-backend
+    <<: *common_parameters
+    image: forome.azurecr.io/anfisa:${ANFISA_BACKEND_VERSION}
+    volumes:
+      - anfisa-asetup:/anfisa/a-setup
+      # - ./anfisa.json:/anfisa/anfisa.json
+      # - ./igv.dir:/anfisa/igv.dir
+```
+
+> More specific information about configuration file [here](https://foromeplatform.github.io/documentation/anfisa-dev.v0.7/adm/configuration.html)
 ## Insert demodata
 
 ### Small dataset ~5mins insert
