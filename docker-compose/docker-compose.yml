@@ -149,6 +149,8 @@ services:
     user: root
     container_name: anfisa-mongo
     <<: *common_networks
+    volumes:
+      - mongo-data:/data/db
     image: mongo:${MONGO_VERSION}
     env_file:
       - mongo.env
@@ -163,3 +165,4 @@ volumes:
   druid-router:
   druid-historical:
   druid-data:
+  mongo-data:
