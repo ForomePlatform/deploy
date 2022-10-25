@@ -1,9 +1,18 @@
 version: "3.9"
 
 x-aliases:
-  - &common_parameters
+  - &common_networks
     networks:
-    - anfisa
+      - anfisa
+  - &common_parameters
+    <<: *common_networks
+    env_file:
+      - .env
+  - &common_druid_parameters
+    <<: *common_networks
+    image: apache/druid:${DRUID_VERSION}
+    env_file:
+      - druid.env
 
 networks:
   anfisa:
@@ -21,8 +30,6 @@ services:
     image: forome.azurecr.io/anfisa-react-client:${ANFISA_FRONTEND_VERSION}
     ports:
       - "${ANFISA_FRONT_PORT}:8080"
-    env_file:
-      - .env
     restart: always
 
   anfisa-backend:
@@ -34,8 +41,6 @@ services:
       - anfisa-asetup:/anfisa/a-setup
       # - ./configs/anfisa.json:/anfisa/anfisa.json
       # - ./configs/igv.dir:/anfisa/igv.dir
-    env_file:
-      - .env
     restart: always
 
   zookeeper:
@@ -51,8 +56,7 @@ services:
   coordinator:
     user: root
     container_name: anfisa-coordinator
-    <<: *common_parameters
-    image: apache/druid:${DRUID_VERSION}
+    <<: *common_druid_parameters
     volumes:
       - druid-data:/opt/data/
       - druid-coordinator:/opt/druid/var
@@ -63,15 +67,12 @@ services:
     environment:
       - DRUID_XMS=256m
       - DRUID_XMX=2g
-    env_file:
-      - druid.env
     # restart: always
 
   broker:
     user: root
     container_name: anfisa-broker
-    <<: *common_parameters
-    image: apache/druid:${DRUID_VERSION}
+    <<: *common_druid_parameters
     volumes:
       - druid-broker:/opt/druid/var
     depends_on:
@@ -84,15 +85,12 @@ services:
       - DRUID_XMX=2g
       - druid_processing_numMergeBuffers=2
       - druid_processing_numThreads=1
-    env_file:
-      - druid.env
     restart: always
 
   historical:
     user: root
     container_name: anfisa-historical
-    <<: *common_parameters
-    image: apache/druid:${DRUID_VERSION}
+    <<: *common_druid_parameters
     volumes:
       - druid-data:/opt/data/
       - druid-historical:/opt/druid/var/
@@ -106,15 +104,12 @@ services:
       - DRUID_XMX=2g
       - druid_processing_numMergeBuffers=2
       - druid_processing_numThreads=2
-    env_file:
-      - druid.env
     restart: always
 
   middlemanager:
     user: root
     container_name: anfisa-middlemanager
-    <<: *common_parameters
-    image: apache/druid:${DRUID_VERSION}
+    <<: *common_druid_parameters
     volumes:
       - druid-data:/opt/data/
       - druid-middlemanager:/opt/druid/var
@@ -130,15 +125,12 @@ services:
       - DRUID_XMX=256m
       - druid_indexer_fork_property_druid_processing_buffer_sizeBytes=100000000
       - druid_indexer_fork_property_druid_processing_numThreads=1
-    env_file:
-      - druid.env
     restart: always
 
   router:
     user: root
     container_name: anfisa-router
-    <<: *common_parameters
-    image: apache/druid:${DRUID_VERSION}
+    <<: *common_druid_parameters
     volumes:
       - druid-router:/opt/druid/var
     depends_on:
@@ -151,14 +143,14 @@ services:
     environment:
       - DRUID_XMS=128m
       - DRUID_XMX=256m
-    env_file:
-      - druid.env
     restart: always
 
   mongo:
     user: root
     container_name: anfisa-mongo
-    <<: *common_parameters
+    <<: *common_networks
+    volumes:
+      - mongo-data:/data/db
     image: mongo:${MONGO_VERSION}
     env_file:
       - mongo.env
@@ -173,3 +165,4 @@ volumes:
   druid-router:
   druid-historical:
   druid-data:
+  mongo-data:
