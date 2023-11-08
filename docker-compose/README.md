@@ -132,7 +132,7 @@ To evaluate AnFiSA capabilities one can use two pre-defined data sets:
 small and large
 
 ### Small dataset (~5 mins to install)
-To install small demo data set, one just nedd to run corresponding script:
+To install small demo data set, one just need to run corresponding script:
 ```sh
 ./demodata.sh
 ```
