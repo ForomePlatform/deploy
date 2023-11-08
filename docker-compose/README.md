@@ -155,7 +155,7 @@ or try to make a custom filter on a real data set.
 Here are example commands that can do this:
 
 ```sh
-    curl -fsSLO https://forome-dataset-public.s3.us-south.cloud-object-storage.appdomain.cloud/pgp3140_wgs_nist-v4.2.tar.gz
+    curl -fsSLO https://forome-data.s3.us.cloud-object-storage.appdomain.cloud/pgp3140/pgp3140_wgs_nist-v4.2.tar.gz
 
     docker cp pgp3140_wgs_nist-v4.2.tar.gz anfisa-backend:/anfisa/a-setup/data/examples/
     docker exec -it anfisa-backend sh -c 'cd /anfisa/a-setup/data/examples && tar -zxvf pgp3140_wgs_nist-v4.2.tar.gz'
