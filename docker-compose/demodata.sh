@@ -1,17 +1,17 @@
 #!/bin/bash
 
   if [ ! -d pgp3140_wgs_hlpanel/docs ] ; then
-    curl -fsSLO https://forome-dataset-public.s3.us-south.cloud-object-storage.appdomain.cloud/pgp3140_wgs_hlpanel.zip
+    curl -fsSLO https://forome-data.s3.us.cloud-object-storage.appdomain.cloud/pgp3140/pgp3140_wgs_hlpanel.zip
     mkdir pgp3140_wgs_hlpanel
     unzip pgp3140_wgs_hlpanel.zip -d ./pgp3140_wgs_hlpanel
   fi
 
-  if [ ! -f gene_db.js ] ; then
-    curl -fsSLO https://forome-dataset-public.s3.us-south.cloud-object-storage.appdomain.cloud/gene_db.zip
-    unzip gene_db.zip
-  fi
-
-  docker cp gene_db.js anfisa-backend:/anfisa/a-setup/data/gene_db.js
+#  if [ ! -f gene_db.js ] ; then
+#    curl -fsSLO https://forome-dataset-public.s3.us-south.cloud-object-storage.appdomain.cloud/gene_db.zip
+#    unzip gene_db.zip
+#  fi
+#
+#  docker cp gene_db.js anfisa-backend:/anfisa/a-setup/data/gene_db.js
   docker exec -it  anfisa-backend sh -c 'mkdir -p /anfisa/a-setup/data/examples/'
   docker cp pgp3140_wgs_hlpanel anfisa-backend:/anfisa/a-setup/data/examples/
   docker exec -it anfisa-backend sh -c 'echo "Initializing ..."; while ! test -f "/anfisa/anfisa.json"; do sleep 5; done'
