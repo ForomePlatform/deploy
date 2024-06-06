@@ -1,13 +1,13 @@
 #!/bin/bash
 
   if [ ! -d pgp3140_wgs_hlpanel/docs ] ; then
-    curl -fsSLO https://forome-data.s3.us.cloud-object-storage.appdomain.cloud/pgp3140/pgp3140_wgs_hlpanel.zip
+    curl -fsSLO https://zenodo.org/records/11496131/files/pgp3140_wgs_hlpanel.zip
     mkdir pgp3140_wgs_hlpanel
     unzip pgp3140_wgs_hlpanel.zip -d ./pgp3140_wgs_hlpanel
   fi
 
   if [ ! -f gene_db.js ] ; then
-    curl -fsSLO https://forome-data.s3.us.cloud-object-storage.appdomain.cloud/misc/gene_db.zip
+    curl -fsSLO https://zenodo.org/records/11496131/files/gene_db.zip
     unzip gene_db.zip
   fi
 

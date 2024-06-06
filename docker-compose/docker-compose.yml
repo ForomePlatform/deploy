@@ -27,7 +27,7 @@ services:
     user: root
     container_name: anfisa-frontend
     <<: *common_parameters
-    image: forome.azurecr.io/anfisa-react-client:${ANFISA_FRONTEND_VERSION}
+    image: forome/anfisa-react-client:${ANFISA_FRONTEND_VERSION}
     ports:
       - "${ANFISA_FRONT_PORT}:8080"
     restart: always
@@ -36,7 +36,7 @@ services:
     user: root
     container_name: anfisa-backend
     <<: *common_parameters
-    image: forome.azurecr.io/anfisa:${ANFISA_BACKEND_VERSION}
+    image: forome/anfisa:${ANFISA_BACKEND_VERSION}
     volumes:
       - anfisa-asetup:/anfisa/a-setup
       # - ./configs/anfisa.json:/anfisa/anfisa.json
