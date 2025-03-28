@@ -147,7 +147,7 @@ or try to make a custom filter on a real data set.
 > experiment with a whole genome 
 
 * First, download 
-  [prepared dataset](https://forome-dataset-public.s3.us-south.cloud-object-storage.appdomain.cloud/pgp3140_wgs_nist-v4.2.tar.gz)
+  [prepared dataset](https://zenodo.org/records/13906214/files/pgp3140_wgs_nist-v4.2-annotated.tgz)
 * Unpack the content into some directory (e.g. directory `data` 
   under your work directory)
 * Run Anfisa ingestion process
@@ -155,10 +155,10 @@ or try to make a custom filter on a real data set.
 Here are example commands that can do this:
 
 ```sh
-    curl -fsSLO https://forome-data.s3.us.cloud-object-storage.appdomain.cloud/pgp3140/pgp3140_wgs_nist-v4.2.tar.gz
+    curl -fSLO https://zenodo.org/records/13906214/files/pgp3140_wgs_nist-v4.2-annotated.tgz
 
-    docker cp pgp3140_wgs_nist-v4.2.tar.gz anfisa-backend:/anfisa/a-setup/data/examples/
-    docker exec -it anfisa-backend sh -c 'cd /anfisa/a-setup/data/examples && tar -zxvf pgp3140_wgs_nist-v4.2.tar.gz'
+    docker cp pgp3140_wgs_nist-v4.2-annotated.tgz anfisa-backend:/anfisa/a-setup/data/examples/
+    docker exec -it anfisa-backend sh -c 'cd /anfisa/a-setup/data/examples && tar -zxvf pgp3140_wgs_nist-v4.2-annotated.tgz'
     docker exec -it anfisa-backend sh -c 'PYTHONPATH=/anfisa/anfisa/ python3 -u -m app.storage -c /anfisa/anfisa.json -m create --reportlines 1000 -f -k xl -i /anfisa/a-setup/data/examples/pgp3140_wgs_nist-v4.2/pgp3140_wgs_nist-v4.2.cfg XL_PGP3140_NIST_V42'
 ```
 
