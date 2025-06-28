@@ -1,0 +1,56 @@
+volumes:
+  anfisa-setup:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: "${ANFISA_VOLUMES_LOCATION:-/opt/anfisa/volumes}/anfisa-setup"
+  anfisa-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: "${ANFISA_VOLUMES_LOCATION:-/opt/anfisa/volumes}/anfisa-data"
+  druid-broker:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: "${ANFISA_VOLUMES_LOCATION:-/opt/anfisa/volumes}/druid-broker"
+  druid-middlemanager:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: "${ANFISA_VOLUMES_LOCATION:-/opt/anfisa/volumes}/druid-middlemanager"
+  druid-coordinator:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: "${ANFISA_VOLUMES_LOCATION:-/opt/anfisa/volumes}/druid-coordinator"
+  druid-router:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: "${ANFISA_VOLUMES_LOCATION:-/opt/anfisa/volumes}/druid-router"
+  druid-historical:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: "${ANFISA_VOLUMES_LOCATION:-/opt/anfisa/volumes}/druid-historical"
+  druid-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: "${ANFISA_VOLUMES_LOCATION:-/opt/anfisa/volumes}/druid-data"
+  mongo-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: "${ANFISA_VOLUMES_LOCATION:-/opt/anfisa/volumes}/mongo-data"
+

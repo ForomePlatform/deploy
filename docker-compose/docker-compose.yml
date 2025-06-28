@@ -1,5 +1,3 @@
-version: "3.9"
-
 x-aliases:
   - &common_networks
     networks:
@@ -37,8 +35,10 @@ services:
     container_name: anfisa-backend
     <<: *common_parameters
     image: forome/anfisa:${ANFISA_BACKEND_VERSION}
+    ports:
+      - "3041:8089"
     volumes:
-      - anfisa-asetup:/anfisa/a-setup
+      - anfisa-setup:/anfisa/a-setup
       # - ./configs/anfisa.json:/anfisa/anfisa.json
       # - ./configs/igv.dir:/anfisa/igv.dir
     restart: always
@@ -113,7 +113,7 @@ services:
     volumes:
       - druid-data:/opt/data/
       - druid-middlemanager:/opt/druid/var
-      - anfisa-asetup:/anfisa/a-setup
+      - anfisa-setup:/anfisa/a-setup
       - anfisa-data:/anfisa/data/
     depends_on:
       - zookeeper
@@ -157,7 +157,7 @@ services:
     restart: always
 
 volumes:
-  anfisa-asetup:
+  anfisa-setup:
   anfisa-data:
   druid-broker:
   druid-middlemanager:
